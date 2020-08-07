@@ -1,5 +1,5 @@
 import sys
-
+from threading import Thread
 import pygame as pg
 
 from DataTypes import Pos
@@ -8,6 +8,8 @@ from views import Vertex
 
 class Visualizer:
     def __init__(self):
+        self.mouseThread = Thread(target=self.mouse)
+        self.mainThread = Thread(target=self.main)
         pg.init()
         self.width, self.height = 720, 720
         self.displaySize = (self.width, self.height)
@@ -17,6 +19,7 @@ class Visualizer:
         self.scale = 1
         self.screen = pg.display.set_mode(self.displaySize)
         self.diments = self.Diments
+        self.vertices: list[Vertex] = [Vertex(999, Pos(*self.displaySizeHalf))]
 
     class Colors:
         OnVertexDefaultColor = (255, 255, 255)
@@ -40,11 +43,15 @@ class Visualizer:
         pg.display.update()
         self.screen.fill(self.Colors.surfaceColor)
 
+    def startMainThread(self):
+        self.mainThread.daemon = False
+        self.mainThread.start()
+
     def main(self):
         while True:
             self.events()
-            v = Vertex(999, Pos(*self.displaySizeHalf))
-            self.drawVertex(v)
+            for v in self.vertices:
+                self.drawVertex(v)
             self.updateDisplay()
 
     def drawVertex(self, v: Vertex):
@@ -55,7 +62,7 @@ class Visualizer:
         font = pg.font.SysFont(pg.font.get_default_font(), self.Diments.fontSizeOnVertex)
         keyImage = font.render(str(v.idKey), True, self.Colors.OnVertexDefaultColor)
         wText, hText = font.size(str(v.idKey))
-        self.screen.blit(keyImage, [(v.pos.x -(wText//2)), (v.pos.y-(hText//2) )])
+        self.screen.blit(keyImage, [(v.pos.x - (wText // 2)), (v.pos.y - (hText // 2))])
 
     def _drawVertexCircle(self, v: Vertex):
         color = self.Colors.onSurfaceColor
@@ -63,7 +70,15 @@ class Visualizer:
             color = self.Colors.vertexDefaultColor
         pg.draw.circle(self.screen, color, v.pos.__iter__(), self.Diments.vertexRadius)
 
+    def startMouseThread(self):
+        self.mouseThread.daemon = False
+        self.mouseThread.start()
+
+    def mouse(self):
+        print("Hello from mouseThread")
+
 
 if __name__ == '__main__':
     v = Visualizer()
-    v.main()
+    v.startMainThread()
+    v.startMouseThread()
