@@ -44,8 +44,12 @@ class Visualizer:
     def events(self):
         for event in pg.event.get():
             if event.type == pg.QUIT:
-                self.mainThreadIsRunning = False
-                sys.exit(0)
+                self.halt()
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_ESCAPE:
+                    self.halt()
+                if event.key == pg.K_LCTRL and self.isSelectingVertexMode:
+                    self.isSelectingVertexMode = False
 
     def updateDisplay(self):
         self.clock.tick(self.fps)
@@ -107,6 +111,10 @@ class Visualizer:
                 return c
         self.isSelectingVertexMode = False
         return None
+
+    def halt(self):
+        self.mainThreadIsRunning = False
+        sys.exit(0)
 
 
 if __name__ == '__main__':
