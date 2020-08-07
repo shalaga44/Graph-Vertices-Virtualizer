@@ -1,4 +1,5 @@
 import sys
+from copy import deepcopy
 from threading import Thread
 import pygame as pg
 
@@ -8,6 +9,7 @@ from views import Vertex
 
 class Visualizer:
     def __init__(self):
+        self.mainThreadIsRunning = True
         self.mouseThread = Thread(target=self.mouse)
         self.mainThread = Thread(target=self.main)
         pg.init()
@@ -32,10 +34,10 @@ class Visualizer:
         vertexRadius = 25 * scaleFactor
         fontSizeOnVertex = 30 * scaleFactor
 
-    @staticmethod
-    def events():
+    def events(self):
         for event in pg.event.get():
             if event.type == pg.QUIT:
+                self.mainThreadIsRunning = False
                 sys.exit(0)
 
     def updateDisplay(self):
@@ -55,8 +57,9 @@ class Visualizer:
             self.updateDisplay()
 
     def drawVertex(self, v: Vertex):
-        self._drawVertexCircle(v)
-        self._drawVertexText(v)
+        vertex = deepcopy(v)
+        self._drawVertexCircle(vertex)
+        self._drawVertexText(vertex)
 
     def _drawVertexText(self, v: Vertex):
         font = pg.font.SysFont(pg.font.get_default_font(), self.Diments.fontSizeOnVertex)
@@ -75,7 +78,10 @@ class Visualizer:
         self.mouseThread.start()
 
     def mouse(self):
-        print("Hello from mouseThread")
+        while self.mainThreadIsRunning:
+            mx, my = pg.mouse.get_pos()
+            self.vertices[0].pos.x = mx
+            self.vertices[0].pos.y = my
 
 
 if __name__ == '__main__':
