@@ -22,7 +22,6 @@ class Visualizer:
         self.fps = 25
         self.scale = 1
         self.screen = pg.display.set_mode(self.displaySize)
-        self.diments = self.Diments
         self.selectedVertex = 0
         self.isSelectingVertexMode = False
         self.vertices: list[Vertex] = [
@@ -30,6 +29,7 @@ class Visualizer:
             Vertex(44, Pos(*self.displaySizeHalf)),
             Vertex(999, Pos(400, 400))
         ]
+        self.verticesPositionsMap = {self.vertices[i].idKey: i for i in range(len(self.vertices))}
 
     class Colors:
         OnVertexDefaultColor = (255, 255, 255)
@@ -49,10 +49,8 @@ class Visualizer:
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
                     self.halt()
-                if event.key == pg.K_LCTRL and self.isSelectingVertexMode:
-                    self.isSelectingVertexMode = False
-            if event.type == pg.MOUSEBUTTONUP:
-                if self.isSelectingVertexMode:
+                elif (event.key == pg.K_LCTRL) or \
+                        (event.type == pg.MOUSEBUTTONUP):
                     self.isSelectingVertexMode = False
 
     def updateDisplay(self):
@@ -67,26 +65,27 @@ class Visualizer:
     def main(self):
         while True:
             self.events()
-            for v in self.vertices:
-                self.drawVertex(v)
+
+            for vertex in self.vertices: self.drawVertex(vertex)
+
             self.updateDisplay()
 
-    def drawVertex(self, v: Vertex):
-        vertex = deepcopy(v)
+    def drawVertex(self, vertex: Vertex):
+        vertex = deepcopy(vertex)
         self._drawVertexCircle(vertex)
         self._drawVertexText(vertex)
 
-    def _drawVertexText(self, v: Vertex):
+    def _drawVertexText(self, vertex: Vertex):
         font = pg.font.SysFont(pg.font.get_default_font(), self.Diments.fontSizeOnVertex)
-        keyImage = font.render(str(v.idKey), True, self.Colors.OnVertexDefaultColor)
-        wText, hText = font.size(str(v.idKey))
-        self.screen.blit(keyImage, [(v.pos.x - (wText // 2)), (v.pos.y - (hText // 2))])
+        keyImage = font.render(str(vertex.idKey), True, self.Colors.OnVertexDefaultColor)
+        wText, hText = font.size(str(vertex.idKey))
+        self.screen.blit(keyImage, [(vertex.pos.x - (wText // 2)), (vertex.pos.y - (hText // 2))])
 
-    def _drawVertexCircle(self, v: Vertex):
+    def _drawVertexCircle(self, vertex: Vertex):
         color = self.Colors.onSurfaceColor
-        if v.status == "default":
+        if vertex.status == "default":
             color = self.Colors.vertexDefaultColor
-        pg.draw.circle(self.screen, color, v.pos.__iter__(), self.Diments.vertexRadius)
+        pg.draw.circle(self.screen, color, vertex.pos.__iter__(), self.Diments.vertexRadius)
 
     def startMouseThread(self):
         self.mouseThread.daemon = False
@@ -94,16 +93,10 @@ class Visualizer:
 
     def mouse(self):
         while self.mainThreadIsRunning:
-            mx, my = pg.mouse.get_pos()
             if self.isSelectingVertexMode:
-                self.vertices[self.selectedVertex].pos.x = mx
-                self.vertices[self.selectedVertex].pos.y = my
-            if pg.mouse.get_pressed()[0]:
-                if self.isSelectingVertexMode:
-                    continue
-                vertex = self.getClickedVertexAt(Pos(mx, my))
-                if vertex is not None:
-                    self.selectedVertex = self.vertices.index(vertex)
+                self.moveSelectedVertexToMouse()
+            elif pg.mouse.get_pressed()[0]:
+                self.updateSelectedVertex()
 
     def getClickedVertexAt(self, p: Pos) -> Optional[Vertex]:
         for c in self.vertices:
@@ -118,6 +111,17 @@ class Visualizer:
     def halt(self):
         self.mainThreadIsRunning = False
         sys.exit(0)
+
+    def moveSelectedVertexToMouse(self):
+        mx, my = pg.mouse.get_pos()
+        self.vertices[self.selectedVertex].pos.x = mx
+        self.vertices[self.selectedVertex].pos.y = my
+
+    def updateSelectedVertex(self):
+        mx, my = pg.mouse.get_pos()
+        vertex = self.getClickedVertexAt(Pos(mx, my))
+        if vertex is not None:
+            self.selectedVertex = self.verticesPositionsMap[vertex.idKey]
 
 
 if __name__ == '__main__':
