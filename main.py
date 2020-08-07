@@ -29,11 +29,7 @@ class Visualizer:
         self.screen = pg.display.set_mode(self.displaySize)
         self.selectedVertex = 0
         self.isSelectingVertexMode = False
-        self.vertices: list[Vertex] = [
-            Vertex(0, Pos(300, 300)),
-            Vertex(44, Pos(*self.displaySizeHalf)),
-            Vertex(999, Pos(400, 400))
-        ]
+        self.vertices = [Vertex(i, Pos(i * 50, i * 50)) for i in range(58)]
         self.verticesPositionsMap = {self.vertices[i].idKey: i for i in range(len(self.vertices))}
 
     def events(self):
@@ -59,17 +55,20 @@ class Visualizer:
     def main(self):
         while True:
             self.events()
-            self.separateVertices()
+            # self.separateVertices()
             for vertex in self.vertices:
-                self.alignVertexOnScreen(vertex)
+                if vertex.isMoved:
+                    self.separateFromOtherVertices(vertex)
+                    self.alignVertexOnScreen(vertex)
                 self.drawVertex(vertex)
 
             self.updateDisplay()
 
     def drawVertex(self, vertex: Vertex):
-        vertex = deepcopy(vertex)
-        self._drawVertexCircle(vertex)
-        self._drawVertexText(vertex)
+        CopiedVertex = deepcopy(vertex)
+        self._drawVertexCircle(CopiedVertex)
+        self._drawVertexText(CopiedVertex)
+        vertex.isMoved = False
 
     def _drawVertexText(self, vertex: Vertex):
         font = pg.font.SysFont(pg.font.get_default_font(), Diments.fontSizeOnVertex)
@@ -83,6 +82,8 @@ class Visualizer:
             color = VerticesColors.vertexDefaultColor
         if vertex.status == VerticesTokens.isSelected:
             color = VerticesColors.vertexSelectedColor
+        if vertex.status == VerticesTokens.isMoving:
+            color = VerticesColors.isMoving
         pg.draw.circle(self.screen, color, vertex.pos.location(), Diments.vertexRadius)
 
     def startMouseThread(self):
@@ -93,6 +94,7 @@ class Visualizer:
         while self.mainThreadIsRunning:
             if self.isSelectingVertexMode:
                 self.moveSelectedVertexToMouse()
+                self.separateFromOtherVertices(self.vertices[self.selectedVertex])
             elif pg.mouse.get_pressed()[0]:
                 if self.isSelectingVertexMode:
                     self.stopVertexSelectingMode()
@@ -173,8 +175,15 @@ class Visualizer:
         if vertex.pos.y - r < 0: vertex.pos.y = 0 + r
         if vertex.pos.y + r > self.height: vertex.pos.y = self.height - r
 
+    def separateFromOtherVertices(self, vertex):
+        for u in self.vertices:
+            if vertex == u: continue
+            if not self.isSelectedVertex(u):
+                intersection = self.isVerticesIntersecting(vertex, u)
+                if intersection:  u.moveAwayFrom(vertex, intersection)
+
 
 if __name__ == '__main__':
     v = Visualizer()
     v.startMainThread()
-    v.startMouseThread()
+    # v.startMouseThread()

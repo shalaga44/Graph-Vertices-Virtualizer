@@ -1,4 +1,5 @@
 class VerticesColors:
+    isMoving = (0, 255, 0)
     vertexSelectedColor = (255, 87, 57)
     OnVertexDefaultColor = (255, 255, 255)
     vertexDefaultColor = (0, 76, 207)

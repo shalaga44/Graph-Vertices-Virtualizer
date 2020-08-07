@@ -1,15 +1,24 @@
 from copy import deepcopy
-
+import itertools
 from DataTypes import Pos
 from Tokens import VerticesTokens
 
 
 class Vertex:
-    status = VerticesTokens.isDefault
+    _status = VerticesTokens.isDefault
+    lastIntersection = None
 
     def __init__(self, idKey: int, pos: Pos):
+        self.isMoved = True
         self.idKey: int = idKey
         self.pos: Pos = pos
+
+    @property
+    def status(self):
+        if self.isMoved:
+            return VerticesTokens.isMoving
+        else:
+            return self._status
 
     def __copy__(self):
         cls = self.__class__
@@ -32,7 +41,22 @@ class Vertex:
         return self.__str__()
 
     def moveAwayFrom(self, v, intersection):
+        if intersection == self.lastIntersection:
+            self.moveItAway()
         diffX = v.pos.x - self.pos.x
         diffY = v.pos.y - self.pos.y
         self.pos.x += diffX * intersection / 10000
         self.pos.y += diffY * intersection / 10000
+        self.isMoved = True
+        self.lastIntersection = intersection
+
+    def moveItAway(self):
+        for (wtfX, wtfY) in self.randomThingIDoNotKnowWhatToNameItForNow():
+            self.pos.x += wtfX
+            self.pos.y += wtfY
+            break
+
+    @staticmethod
+    def randomThingIDoNotKnowWhatToNameItForNow():
+        for bla in list(sorted(itertools.permutations([-5, 0, 5], 2))):
+            yield bla
