@@ -1,4 +1,4 @@
 class Diments:
-    scaleFactor = 1
-    vertexRadius = 25 * scaleFactor
-    fontSizeOnVertex = 30 * scaleFactor
+    scaleFactor = .9
+    vertexRadius = int(25 * scaleFactor)
+    fontSizeOnVertex = int(30 * scaleFactor)

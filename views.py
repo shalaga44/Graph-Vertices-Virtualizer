@@ -1,17 +1,52 @@
-from copy import deepcopy
 import itertools
+from copy import deepcopy
+
+import pygame
+from pygame.font import SysFont
+from pygame.font import get_default_font
+
+import Colors
 from DataTypes import Pos
+from Diments import Diments
 from Tokens import VerticesTokens
 
 
 class Vertex:
+    _color = Colors.VerticesColors.vertexDefaultColor
     _status = VerticesTokens.isDefault
+    _isMoved = True
+
+    wTextHalf, hTextHalf = None, None
     lastIntersection = None
 
     def __init__(self, idKey: int, pos: Pos):
-        self.isMoved = True
         self.idKey: int = idKey
         self.pos: Pos = pos
+        self.textImage = self.getTextImage()
+
+    def getTextImage(self) -> pygame.Surface:
+        font = SysFont(get_default_font(), Diments.fontSizeOnVertex)
+        keyImage = font.render(str(self.idKey), True, Colors.VerticesColors.OnVertexDefaultColor)
+        wText, hText = font.size(str(self.idKey))
+        self.wTextHalf, self.hTextHalf = wText // 2, hText // 2
+        return keyImage
+
+    @property
+    def textPos(self):
+        return self.pos.x - self.wTextHalf, self.pos.y - self.hTextHalf
+
+    @property
+    def color(self):
+        return self._color
+
+    @property
+    def isMoved(self):
+        return self._isMoved
+
+    @isMoved.setter
+    def isMoved(self, b: bool):
+        self.updateColor()
+        self._isMoved = b
 
     @property
     def status(self):
@@ -19,6 +54,11 @@ class Vertex:
             return VerticesTokens.isMoving
         else:
             return self._status
+
+    @status.setter
+    def status(self, newStatus):
+        self._status = newStatus
+        self.updateColor()
 
     def __copy__(self):
         cls = self.__class__
@@ -31,7 +71,10 @@ class Vertex:
         result = cls.__new__(cls)
         memo[id(self)] = result
         for k, v in self.__dict__.items():
-            setattr(result, k, deepcopy(v, memo))
+            if k == "textImage":
+                setattr(result, k, v)
+            else:
+                setattr(result, k, deepcopy(v, memo))
         return result
 
     def __str__(self):
@@ -60,3 +103,13 @@ class Vertex:
     def randomThingIDoNotKnowWhatToNameItForNow():
         for bla in list(sorted(itertools.permutations([-5, 0, 5], 2))):
             yield bla
+
+    def updateColor(self):
+        color = Colors.MainColors.onSurfaceColor
+        if self.status == VerticesTokens.isDefault:
+            color = Colors.VerticesColors.vertexDefaultColor
+        elif self.status == VerticesTokens.isSelected:
+            color = Colors.VerticesColors.vertexSelectedColor
+        elif self.status == VerticesTokens.isMoving:
+            color = Colors.VerticesColors.isMoving
+        self._color = color

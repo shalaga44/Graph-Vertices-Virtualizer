@@ -29,7 +29,7 @@ class Visualizer:
         self.screen = pg.display.set_mode(self.displaySize)
         self.selectedVertex = 0
         self.isSelectingVertexMode = False
-        self.vertices = [Vertex(i, Pos(i * 50, i * 50)) for i in range(58)]
+        self.vertices = [Vertex(i, Pos(i * 50, i * 50)) for i in range(57)]
         self.verticesPositionsMap = {self.vertices[i].idKey: i for i in range(len(self.vertices))}
 
     def events(self):
@@ -71,20 +71,11 @@ class Visualizer:
         vertex.isMoved = False
 
     def _drawVertexText(self, vertex: Vertex):
-        font = pg.font.SysFont(pg.font.get_default_font(), Diments.fontSizeOnVertex)
-        keyImage = font.render(str(vertex.idKey), True, VerticesColors.OnVertexDefaultColor)
-        wText, hText = font.size(str(vertex.idKey))
-        self.screen.blit(keyImage, [(vertex.pos.x - (wText // 2)), (vertex.pos.y - (hText // 2))])
+
+        self.screen.blit(vertex.textImage, vertex.textPos)
 
     def _drawVertexCircle(self, vertex: Vertex):
-        color = MainColors.onSurfaceColor
-        if vertex.status == VerticesTokens.isDefault:
-            color = VerticesColors.vertexDefaultColor
-        if vertex.status == VerticesTokens.isSelected:
-            color = VerticesColors.vertexSelectedColor
-        if vertex.status == VerticesTokens.isMoving:
-            color = VerticesColors.isMoving
-        pg.draw.circle(self.screen, color, vertex.pos.location(), Diments.vertexRadius)
+        pg.draw.circle(self.screen, vertex.color, vertex.pos.location(), Diments.vertexRadius)
 
     def startMouseThread(self):
         self.mouseThread.daemon = False
@@ -166,7 +157,9 @@ class Visualizer:
         self.isSelectingVertexMode = False
 
     def isSelectedVertex(self, v: Vertex):
-        return self.verticesPositionsMap[v.idKey] == self.selectedVertex
+        if self.isSelectingVertexMode:
+            return self.verticesPositionsMap[v.idKey] == self.selectedVertex
+        return  False
 
     def alignVertexOnScreen(self, vertex):
         r = Diments.vertexRadius
@@ -186,4 +179,4 @@ class Visualizer:
 if __name__ == '__main__':
     v = Visualizer()
     v.startMainThread()
-    # v.startMouseThread()
+    v.startMouseThread()
