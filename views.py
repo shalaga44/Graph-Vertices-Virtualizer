@@ -29,3 +29,9 @@ class Vertex:
 
     def __repr__(self):
         return self.__str__()
+
+    def moveAwayFrom(self, v, intersection):
+        diffX = v.pos.x - self.pos.x
+        diffY = v.pos.y - self.pos.y
+        self.pos.x += diffX * intersection / 10000
+        self.pos.y += diffY * intersection / 10000

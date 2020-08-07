@@ -32,6 +32,7 @@ class Visualizer:
         self.verticesPositionsMap = {self.vertices[i].idKey: i for i in range(len(self.vertices))}
 
     class Colors:
+        vertexSelectedColor = (255, 87, 57)
         OnVertexDefaultColor = (255, 255, 255)
         surfaceColor = (255, 255, 255)
         onSurfaceColor = (0, 0, 0)
@@ -51,7 +52,7 @@ class Visualizer:
                     self.halt()
                 elif (event.key == pg.K_LCTRL) or \
                         (event.type == pg.MOUSEBUTTONUP):
-                    self.isSelectingVertexMode = False
+                    self.stopVertexSelectingMode()
 
     def updateDisplay(self):
         self.clock.tick(self.fps)
@@ -65,7 +66,7 @@ class Visualizer:
     def main(self):
         while True:
             self.events()
-
+            self.separateVertices()
             for vertex in self.vertices: self.drawVertex(vertex)
 
             self.updateDisplay()
@@ -85,7 +86,14 @@ class Visualizer:
         color = self.Colors.onSurfaceColor
         if vertex.status == "default":
             color = self.Colors.vertexDefaultColor
-        pg.draw.circle(self.screen, color, vertex.pos.__iter__(), self.Diments.vertexRadius)
+        if vertex.status == "selected":
+            color = self.Colors.vertexSelectedColor
+        r = self.Diments.vertexRadius
+        if vertex.pos.x - r < 0: vertex.pos.x = 1 + r
+        if vertex.pos.x + r > self.width: vertex.pos.x = self.width - r
+        if vertex.pos.y - r < 0: vertex.pos.y = 1 + r
+        if vertex.pos.y + r > self.height: vertex.pos.y = self.height - r
+        pg.draw.circle(self.screen, color, vertex.pos.location(), self.Diments.vertexRadius)
 
     def startMouseThread(self):
         self.mouseThread.daemon = False
@@ -99,13 +107,11 @@ class Visualizer:
                 self.updateSelectedVertex()
 
     def getClickedVertexAt(self, p: Pos) -> Optional[Vertex]:
+        r = self.Diments.vertexRadius
         for c in self.vertices:
-            d = math.sqrt((abs(p.x - c.pos.x) ** 2) +
-                          (abs(p.y - c.pos.y) ** 2))
-            if d <= self.Diments.vertexRadius:
-                self.isSelectingVertexMode = True
+            if self.isPointInCircle(p.x, p.y, c.pos.x, c.pos.y, r):
                 return c
-        self.isSelectingVertexMode = False
+        self.stopVertexSelectingMode()
         return None
 
     def halt(self):
@@ -121,7 +127,48 @@ class Visualizer:
         mx, my = pg.mouse.get_pos()
         vertex = self.getClickedVertexAt(Pos(mx, my))
         if vertex is not None:
-            self.selectedVertex = self.verticesPositionsMap[vertex.idKey]
+            self.startVertexSelectingMode(vertex)
+
+    def separateVertices(self):
+        for v in self.vertices:
+            for u in self.vertices:
+                if self.verticesPositionsMap[u.idKey] == self.selectedVertex:
+                    continue
+                if v == u: continue
+                intersection = self.isVerticesIntersecting(v, u)
+                if intersection:
+                    u.moveAwayFrom(v, intersection)
+
+    def isVerticesIntersecting(self, v, u):
+        r = self.Diments.vertexRadius * 2
+        return self.isCirclesIntersecting(v.pos.x, v.pos.y, u.pos.x, u.pos.y, r, r)
+
+    @staticmethod
+    def isPointInCircle(pX, pY, cX, cY, r):
+        d = math.sqrt((abs(pX - cX) ** 2) +
+                      (abs(pY - cY) ** 2))
+        if d <= r:
+            return True
+        return False
+
+    @staticmethod
+    def isCirclesIntersecting(x1, y1, x2, y2, r1, r2):
+        distSq = (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)
+        radSumSq = (r1 + r2) * (r1 + r2)
+        intersection = distSq - radSumSq
+        if intersection < 0:
+            return intersection
+        return 0
+
+    def startVertexSelectingMode(self, vertex):
+        self.selectedVertex = self.verticesPositionsMap[vertex.idKey]
+        vertex.status = "selected"
+        self.isSelectingVertexMode = True
+
+    def stopVertexSelectingMode(self):
+        vertex = self.vertices[self.selectedVertex]
+        vertex.status = "default"
+        self.isSelectingVertexMode = False
 
 
 if __name__ == '__main__':
