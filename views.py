@@ -1,10 +1,11 @@
 from copy import deepcopy
 
 from DataTypes import Pos
+from Tokens import VerticesTokens
 
 
 class Vertex:
-    status = "default"
+    status = VerticesTokens.isDefault
 
     def __init__(self, idKey: int, pos: Pos):
         self.idKey: int = idKey

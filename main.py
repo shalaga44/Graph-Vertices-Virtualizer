@@ -5,12 +5,17 @@ from typing import Optional
 
 import pygame as pg
 import math
+
+from Colors import MainColors, VerticesColors
 from DataTypes import Pos
+from Diments import Diments
+from Tokens import VerticesTokens
 from views import Vertex
 
 
 class Visualizer:
     def __init__(self):
+
         self.mainThreadIsRunning = True
         self.mouseThread = Thread(target=self.mouse)
         self.mainThread = Thread(target=self.main)
@@ -31,18 +36,6 @@ class Visualizer:
         ]
         self.verticesPositionsMap = {self.vertices[i].idKey: i for i in range(len(self.vertices))}
 
-    class Colors:
-        vertexSelectedColor = (255, 87, 57)
-        OnVertexDefaultColor = (255, 255, 255)
-        surfaceColor = (255, 255, 255)
-        onSurfaceColor = (0, 0, 0)
-        vertexDefaultColor = (0, 76, 207)
-
-    class Diments:
-        scaleFactor = 1
-        vertexRadius = 25 * scaleFactor
-        fontSizeOnVertex = 30 * scaleFactor
-
     def events(self):
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -57,7 +50,7 @@ class Visualizer:
     def updateDisplay(self):
         self.clock.tick(self.fps)
         pg.display.update()
-        self.screen.fill(self.Colors.surfaceColor)
+        self.screen.fill(MainColors.surfaceColor)
 
     def startMainThread(self):
         self.mainThread.daemon = False
@@ -67,7 +60,9 @@ class Visualizer:
         while True:
             self.events()
             self.separateVertices()
-            for vertex in self.vertices: self.drawVertex(vertex)
+            for vertex in self.vertices:
+                self.alignVertexOnScreen(vertex)
+                self.drawVertex(vertex)
 
             self.updateDisplay()
 
@@ -77,23 +72,18 @@ class Visualizer:
         self._drawVertexText(vertex)
 
     def _drawVertexText(self, vertex: Vertex):
-        font = pg.font.SysFont(pg.font.get_default_font(), self.Diments.fontSizeOnVertex)
-        keyImage = font.render(str(vertex.idKey), True, self.Colors.OnVertexDefaultColor)
+        font = pg.font.SysFont(pg.font.get_default_font(), Diments.fontSizeOnVertex)
+        keyImage = font.render(str(vertex.idKey), True, VerticesColors.OnVertexDefaultColor)
         wText, hText = font.size(str(vertex.idKey))
         self.screen.blit(keyImage, [(vertex.pos.x - (wText // 2)), (vertex.pos.y - (hText // 2))])
 
     def _drawVertexCircle(self, vertex: Vertex):
-        color = self.Colors.onSurfaceColor
-        if vertex.status == "default":
-            color = self.Colors.vertexDefaultColor
-        if vertex.status == "selected":
-            color = self.Colors.vertexSelectedColor
-        r = self.Diments.vertexRadius
-        if vertex.pos.x - r < 0: vertex.pos.x = 1 + r
-        if vertex.pos.x + r > self.width: vertex.pos.x = self.width - r
-        if vertex.pos.y - r < 0: vertex.pos.y = 1 + r
-        if vertex.pos.y + r > self.height: vertex.pos.y = self.height - r
-        pg.draw.circle(self.screen, color, vertex.pos.location(), self.Diments.vertexRadius)
+        color = MainColors.onSurfaceColor
+        if vertex.status == VerticesTokens.isDefault:
+            color = VerticesColors.vertexDefaultColor
+        if vertex.status == VerticesTokens.isSelected:
+            color = VerticesColors.vertexSelectedColor
+        pg.draw.circle(self.screen, color, vertex.pos.location(), Diments.vertexRadius)
 
     def startMouseThread(self):
         self.mouseThread.daemon = False
@@ -104,10 +94,13 @@ class Visualizer:
             if self.isSelectingVertexMode:
                 self.moveSelectedVertexToMouse()
             elif pg.mouse.get_pressed()[0]:
-                self.updateSelectedVertex()
+                if self.isSelectingVertexMode:
+                    self.stopVertexSelectingMode()
+                else:
+                    self.startVertexSelectingMode()
 
     def getClickedVertexAt(self, p: Pos) -> Optional[Vertex]:
-        r = self.Diments.vertexRadius
+        r = Diments.vertexRadius
         for c in self.vertices:
             if self.isPointInCircle(p.x, p.y, c.pos.x, c.pos.y, r):
                 return c
@@ -130,25 +123,21 @@ class Visualizer:
             self.startVertexSelectingMode(vertex)
 
     def separateVertices(self):
-        for v in self.vertices:
+        for vertex in self.vertices:
             for u in self.vertices:
-                if self.verticesPositionsMap[u.idKey] == self.selectedVertex:
-                    continue
-                if v == u: continue
-                intersection = self.isVerticesIntersecting(v, u)
-                if intersection:
-                    u.moveAwayFrom(v, intersection)
+                if vertex == u: continue
+                if not self.isSelectedVertex(u):
+                    intersection = self.isVerticesIntersecting(vertex, u)
+                    if intersection:  u.moveAwayFrom(vertex, intersection)
 
     def isVerticesIntersecting(self, v, u):
-        r = self.Diments.vertexRadius * 2
+        r = Diments.vertexRadius * 2
         return self.isCirclesIntersecting(v.pos.x, v.pos.y, u.pos.x, u.pos.y, r, r)
 
     @staticmethod
     def isPointInCircle(pX, pY, cX, cY, r):
-        d = math.sqrt((abs(pX - cX) ** 2) +
-                      (abs(pY - cY) ** 2))
-        if d <= r:
-            return True
+        d = math.sqrt((abs(pX - cX) ** 2) + (abs(pY - cY) ** 2))
+        if d <= r: return True
         return False
 
     @staticmethod
@@ -160,15 +149,29 @@ class Visualizer:
             return intersection
         return 0
 
-    def startVertexSelectingMode(self, vertex):
-        self.selectedVertex = self.verticesPositionsMap[vertex.idKey]
-        vertex.status = "selected"
-        self.isSelectingVertexMode = True
+    def startVertexSelectingMode(self, vertex=None):
+        if vertex is None:
+            self.updateSelectedVertex()
+
+        if vertex is not None:
+            self.selectedVertex = self.verticesPositionsMap[vertex.idKey]
+            vertex.status = VerticesTokens.isSelected
+            self.isSelectingVertexMode = True
 
     def stopVertexSelectingMode(self):
         vertex = self.vertices[self.selectedVertex]
-        vertex.status = "default"
+        vertex.status = VerticesTokens.isDefault
         self.isSelectingVertexMode = False
+
+    def isSelectedVertex(self, v: Vertex):
+        return self.verticesPositionsMap[v.idKey] == self.selectedVertex
+
+    def alignVertexOnScreen(self, vertex):
+        r = Diments.vertexRadius
+        if vertex.pos.x - r < 0: vertex.pos.x = 0 + r
+        if vertex.pos.x + r > self.width: vertex.pos.x = self.width - r
+        if vertex.pos.y - r < 0: vertex.pos.y = 0 + r
+        if vertex.pos.y + r > self.height: vertex.pos.y = self.height - r
 
 
 if __name__ == '__main__':

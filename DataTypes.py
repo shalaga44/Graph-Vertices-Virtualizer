@@ -1,12 +1,8 @@
-from pygame import Vector2
-
-
-class Pos(Vector2):
+class Pos:
 
     def __init__(self, x: int, y: int):
-        super().__init__()
-        self.x: int = x
-        self.y: int = y
+        self._x: int = x
+        self._y: int = y
 
     def location(self):
         return [int(self.x), int(self.y)]
@@ -16,3 +12,19 @@ class Pos(Vector2):
 
     def __repr__(self):
         return self.__str__()
+
+    @property
+    def x(self):
+        return self._x
+
+    @x.setter
+    def x(self, x):
+        self._x = int(x)
+
+    @property
+    def y(self):
+        return self._y
+
+    @y.setter
+    def y(self, y):
+        self._y = int(y)
