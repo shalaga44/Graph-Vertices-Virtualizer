@@ -26,6 +26,7 @@ class Visualizer:
         self.selectedVertex = 0
         self.isSelectingVertexMode = False
         self.vertices: list[Vertex] = [
+            Vertex(0, Pos(300, 300)),
             Vertex(44, Pos(*self.displaySizeHalf)),
             Vertex(999, Pos(400, 400))
         ]
@@ -49,6 +50,9 @@ class Visualizer:
                 if event.key == pg.K_ESCAPE:
                     self.halt()
                 if event.key == pg.K_LCTRL and self.isSelectingVertexMode:
+                    self.isSelectingVertexMode = False
+            if event.type == pg.MOUSEBUTTONUP:
+                if self.isSelectingVertexMode:
                     self.isSelectingVertexMode = False
 
     def updateDisplay(self):
@@ -96,7 +100,6 @@ class Visualizer:
                 self.vertices[self.selectedVertex].pos.y = my
             if pg.mouse.get_pressed()[0]:
                 if self.isSelectingVertexMode:
-                    self.isSelectingVertexMode = False
                     continue
                 vertex = self.getClickedVertexAt(Pos(mx, my))
                 if vertex is not None:
