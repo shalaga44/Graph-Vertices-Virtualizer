@@ -1,4 +1,5 @@
 from copy import deepcopy
+
 from DataTypes import Pos
 
 
@@ -22,3 +23,9 @@ class Vertex:
         for k, v in self.__dict__.items():
             setattr(result, k, deepcopy(v, memo))
         return result
+
+    def __str__(self):
+        return f"id:{self.idKey}, pos:{self.pos}"
+
+    def __repr__(self):
+        return self.__str__()

@@ -1,8 +1,10 @@
 import sys
 from copy import deepcopy
 from threading import Thread
-import pygame as pg
+from typing import Optional
 
+import pygame as pg
+import math
 from DataTypes import Pos
 from views import Vertex
 
@@ -21,7 +23,12 @@ class Visualizer:
         self.scale = 1
         self.screen = pg.display.set_mode(self.displaySize)
         self.diments = self.Diments
-        self.vertices: list[Vertex] = [Vertex(999, Pos(*self.displaySizeHalf))]
+        self.selectedVertex = 0
+        self.isSelectingVertexMode = False
+        self.vertices: list[Vertex] = [
+            Vertex(44, Pos(*self.displaySizeHalf)),
+            Vertex(999, Pos(400, 400))
+        ]
 
     class Colors:
         OnVertexDefaultColor = (255, 255, 255)
@@ -80,8 +87,26 @@ class Visualizer:
     def mouse(self):
         while self.mainThreadIsRunning:
             mx, my = pg.mouse.get_pos()
-            self.vertices[0].pos.x = mx
-            self.vertices[0].pos.y = my
+            if self.isSelectingVertexMode:
+                self.vertices[self.selectedVertex].pos.x = mx
+                self.vertices[self.selectedVertex].pos.y = my
+            if pg.mouse.get_pressed()[0]:
+                if self.isSelectingVertexMode:
+                    self.isSelectingVertexMode = False
+                    continue
+                vertex = self.getClickedVertexAt(Pos(mx, my))
+                if vertex is not None:
+                    self.selectedVertex = self.vertices.index(vertex)
+
+    def getClickedVertexAt(self, p: Pos) -> Optional[Vertex]:
+        for c in self.vertices:
+            d = math.sqrt((abs(p.x - c.pos.x) ** 2) +
+                          (abs(p.y - c.pos.y) ** 2))
+            if d <= self.Diments.vertexRadius:
+                self.isSelectingVertexMode = True
+                return c
+        self.isSelectingVertexMode = False
+        return None
 
 
 if __name__ == '__main__':
