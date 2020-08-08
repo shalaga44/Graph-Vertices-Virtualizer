@@ -6,7 +6,7 @@ from typing import Optional
 import pygame as pg
 import math
 
-from Colors import MainColors, VerticesColors
+from Colors import MainColors
 from DataTypes import Pos
 from Diments import Diments
 from Tokens import VerticesTokens
@@ -20,7 +20,7 @@ class Visualizer:
         self.mouseThread = Thread(target=self.mouse)
         self.mainThread = Thread(target=self.main)
         pg.init()
-        self.width, self.height = 720, 720
+        self.width, self.height = 1280, 720
         self.displaySize = (self.width, self.height)
         self.displaySizeHalf = (self.width // 2, self.height // 2)
         self.clock = pg.time.Clock()
@@ -29,7 +29,8 @@ class Visualizer:
         self.screen = pg.display.set_mode(self.displaySize)
         self.selectedVertex = 0
         self.isSelectingVertexMode = False
-        self.vertices = [Vertex(i, Pos(i * 50, i * 50)) for i in range(57)]
+        self.vertices = []
+        self.vertices.extend(self.generateVerticesCanFitIn(self.width, self.height))
         self.verticesPositionsMap = {self.vertices[i].idKey: i for i in range(len(self.vertices))}
 
     def events(self):
@@ -159,7 +160,7 @@ class Visualizer:
     def isSelectedVertex(self, v: Vertex):
         if self.isSelectingVertexMode:
             return self.verticesPositionsMap[v.idKey] == self.selectedVertex
-        return  False
+        return False
 
     def alignVertexOnScreen(self, vertex):
         r = Diments.vertexRadius
@@ -174,6 +175,15 @@ class Visualizer:
             if not self.isSelectedVertex(u):
                 intersection = self.isVerticesIntersecting(vertex, u)
                 if intersection:  u.moveAwayFrom(vertex, intersection)
+
+    @staticmethod
+    def generateVerticesCanFitIn(width, height):
+        c, r = ((width // (Diments.vertexRadius * 2)) // 2) + 1, (
+                (height // (Diments.vertexRadius * 2)) // 2)
+        vertices = [Vertex(i, Pos(((i % c) * (width // c)),
+                                  ((i // c) * (height // r))))
+                    for i in range(c * r)]
+        return vertices
 
 
 if __name__ == '__main__':

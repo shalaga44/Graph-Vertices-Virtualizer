@@ -1,7 +1,7 @@
 import itertools
 from copy import deepcopy
 
-import pygame
+from pygame.surface import Surface
 from pygame.font import SysFont
 from pygame.font import get_default_font
 
@@ -24,7 +24,7 @@ class Vertex:
         self.pos: Pos = pos
         self.textImage = self.getTextImage()
 
-    def getTextImage(self) -> pygame.Surface:
+    def getTextImage(self) -> Surface:
         font = SysFont(get_default_font(), Diments.fontSizeOnVertex)
         keyImage = font.render(str(self.idKey), True, Colors.VerticesColors.OnVertexDefaultColor)
         wText, hText = font.size(str(self.idKey))
