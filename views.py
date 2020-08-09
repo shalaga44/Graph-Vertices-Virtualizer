@@ -18,11 +18,21 @@ class Vertex:
 
     wTextHalf, hTextHalf = None, None
     lastIntersection = None
+    x = False
 
     def __init__(self, idKey: int, pos: Pos):
         self.idKey: int = idKey
-        self.pos: Pos = pos
+        self._pos: Pos = pos
         self.textImage = self.getTextImage()
+
+    @property
+    def pos(self):
+        return self._pos
+
+    @pos.setter
+    def pos(self, newPos):
+        self.isMoved = True
+        self.pos = newPos
 
     def getTextImage(self) -> Surface:
         font = SysFont(get_default_font(), VerticesDiments.fontSize)
@@ -82,27 +92,6 @@ class Vertex:
 
     def __repr__(self):
         return self.__str__()
-
-    def moveAwayFrom(self, v, intersection):
-        if intersection == self.lastIntersection:
-            self.moveItAway()
-        diffX = v.pos.x - self.pos.x
-        diffY = v.pos.y - self.pos.y
-        self.pos.x += diffX * intersection / 10000
-        self.pos.y += diffY * intersection / 10000
-        self.isMoved = True
-        self.lastIntersection = intersection
-
-    def moveItAway(self):
-        for (wtfX, wtfY) in self.randomThingIDoNotKnowWhatToNameItForNow():
-            self.pos.x += wtfX
-            self.pos.y += wtfY
-            break
-
-    @staticmethod
-    def randomThingIDoNotKnowWhatToNameItForNow():
-        bla = random.choice(list(itertools.permutations([-EdgesDiments.length, 0, EdgesDiments.length], 2)))
-        yield bla
 
     def updateColor(self):
         color = Colors.MainColors.onSurfaceColor

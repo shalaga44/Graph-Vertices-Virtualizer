@@ -1,16 +1,15 @@
 import sys
 from copy import deepcopy
 from threading import Thread
-from typing import Optional
+from typing import Final
 
 import pygame as pg
-import math
 
 from Colors import MainColors, EdgesColors
 from DataTypes import Pos
 from Dimensions import VerticesDiments, EdgesDiments
-from Tokens import VerticesTokens
-from views import Vertex, Edge
+from Mangers import GraphManager
+from views import Vertex
 
 
 class Visualizer:
@@ -28,25 +27,50 @@ class Visualizer:
         self.scale = 1
         self.screen = pg.display.set_mode(self.displaySize)
         self.selectedVertex = 0
-        self.isSelectingVertexMode = False
-        self.vertices: list[Vertex] = []
-        self.vertices.extend([Vertex(44, Pos(*self.displaySizeHalf)), Vertex(0, Pos(*self.displaySizeHalf)),
-                              Vertex(-1, Pos(*self.displaySizeHalf)), Vertex(999, Pos(*self.displaySizeHalf)),
-                              Vertex(-2, Pos(*self.displaySizeHalf)), Vertex(-3, Pos(*self.displaySizeHalf)),
-                              Vertex(-5, Pos(*self.displaySizeHalf)), Vertex(-4, Pos(*self.displaySizeHalf)),
-                              Vertex(-7, Pos(*self.displaySizeHalf)), Vertex(-8, Pos(*self.displaySizeHalf))])
-        # self.vertices.extend(self.generateVerticesCanFitIn(self.width, self.height))
-        self.verticesPositionsMap: dict[int:int] = {self.vertices[i].idKey: i for i in range(len(self.vertices))}
-        self.edges: list[Edge] = []
-        # self.edges.extend([Edge(44, 999)])
-        self.edges.extend([Edge(44, 999), Edge(0, 999), Edge(44, 0), Edge(-7, 0), Edge(-8, 44),
-                           Edge(-2, -3), Edge(-3, -4), Edge(-4, -5), Edge(-5, -2)])
-        self.edgesPositionsMap: dict[int:int] = {self.edges[i]: i for i in range(len(self.edges))}
+        self.graphManger: Final = GraphManager(*self.displaySize)
+        # self.graphManger.generateVerticesCanFitIn(*self.displaySizeHalf)
+        self.graphManger.generate2ComponentsGraph()
+
+    def main(self):
+        while True:
+            self.events()
+
+            self.graphManger.setupEdges()
+            self.graphManger.setupVertices()
+            self.drawEdges()
+            self.drawVertices()
+
+            self.updateDisplay()
+
+    def drawVertices(self):
+        for vertex in self.graphManger.vertices:
+            self._drawVertex(vertex)
+            # vertex.isMoved = False
+
+    def mouse(self):
+        while self.mainThreadIsRunning:
+            if self.graphManger.isSelectingVertexMode:
+                self.moveSelectedVertexToMouse()
+
+    def startVertexSelectingMode(self, mousePos: Pos):
+        self.graphManger.startVertexSelectingMode(mousePos)
+
+    def stopVertexSelectingMode(self):
+        self.graphManger.stopVertexSelectingMode()
+
+    def _drawEdge(self, edge):
+        pg.draw.line(self.screen, EdgesColors.default,
+                     self.graphManger.vertices[self.graphManger.verticesPositionsMap[edge.start]].pos.location(),
+                     self.graphManger.vertices[self.graphManger.verticesPositionsMap[edge.end]].pos.location(),
+                     EdgesDiments.width)
 
     def events(self):
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 self.halt()
+            if event.type == pg.MOUSEBUTTONDOWN:
+                mx, my = pg.mouse.get_pos()
+                self.startVertexSelectingMode(Pos(mx, my))
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
                     self.halt()
@@ -63,52 +87,24 @@ class Visualizer:
         self.mainThread.daemon = False
         self.mainThread.start()
 
-    def main(self):
-        while True:
-            self.events()
-
-            self.setupEdges()
-            self.setupVertices()
-            self.drawEdges()
-            self.drawVertices()
-
-            self.updateDisplay()
-
     def _drawVertex(self, vertex: Vertex):
         CopiedVertex = deepcopy(vertex)
         self._drawVertexCircle(CopiedVertex)
         self._drawVertexText(CopiedVertex)
-        vertex.isMoved = False
 
     def _drawVertexText(self, vertex: Vertex):
-
         self.screen.blit(vertex.textImage, vertex.textPos)
 
     def _drawVertexCircle(self, vertex: Vertex):
         pg.draw.circle(self.screen, vertex.color, vertex.pos.location(), VerticesDiments.radius)
 
+    def drawEdges(self):
+        for edge in self.graphManger.edges:
+            self._drawEdge(edge)
+
     def startMouseThread(self):
         self.mouseThread.daemon = False
         self.mouseThread.start()
-
-    def mouse(self):
-        while self.mainThreadIsRunning:
-            if self.isSelectingVertexMode:
-                self.moveSelectedVertexToMouse()
-                self._separateFromOtherVertices(self.vertices[self.selectedVertex])
-            elif pg.mouse.get_pressed()[0]:
-                if self.isSelectingVertexMode:
-                    self.stopVertexSelectingMode()
-                else:
-                    self.startVertexSelectingMode()
-
-    def getClickedVertexAt(self, p: Pos) -> Optional[Vertex]:
-        r = VerticesDiments.radius
-        for c in self.vertices:
-            if self.isPointInCircle(p.x, p.y, c.pos.x, c.pos.y, r):
-                return c
-        self.stopVertexSelectingMode()
-        return None
 
     def halt(self):
         self.mainThreadIsRunning = False
@@ -116,123 +112,7 @@ class Visualizer:
 
     def moveSelectedVertexToMouse(self):
         mx, my = pg.mouse.get_pos()
-        self.vertices[self.selectedVertex].pos.x = mx
-        self.vertices[self.selectedVertex].pos.y = my
-
-    def updateSelectedVertex(self):
-        mx, my = pg.mouse.get_pos()
-        vertex = self.getClickedVertexAt(Pos(mx, my))
-        if vertex is not None:
-            self.startVertexSelectingMode(vertex)
-
-    # def separateVertices(self):
-    #     for vertex in self.vertices:
-    #         for u in self.vertices:
-    #             if vertex == u: continue
-    #             if not self.isSelectedVertex(u):
-    #                 intersection = self.isVerticesIntersecting(vertex, u, VerticesDiments.intersectionRadius)
-    #                 if intersection:  u.moveAwayFrom(vertex, intersection)
-
-    def isVerticesIntersecting(self, v: Vertex, u: Vertex, radius: int):
-        intersection = self.getCirclesIntersection(v.pos.x, v.pos.y, u.pos.x, u.pos.y, radius, radius)
-        if intersection < 0:
-            return intersection
-        return False
-
-    def getVerticesIntersection(self, v: Vertex, u: Vertex, radius: int):
-        intersection = self.getCirclesIntersection(v.pos.x, v.pos.y, u.pos.x, u.pos.y, radius, radius)
-        return intersection
-
-    @staticmethod
-    def isPointInCircle(pX, pY, cX, cY, r):
-        d = math.sqrt((abs(pX - cX) ** 2) + (abs(pY - cY) ** 2))
-        if d <= r: return True
-        return False
-
-    @staticmethod
-    def getCirclesIntersection(x1, y1, x2, y2, r1, r2):
-        distSq = (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)
-        radSumSq = (r1 + r2) * (r1 + r2)
-        intersection = distSq - radSumSq
-        return intersection
-
-    def startVertexSelectingMode(self, vertex=None):
-        if vertex is None:
-            self.updateSelectedVertex()
-
-        if vertex is not None:
-            self.selectedVertex = self.verticesPositionsMap[vertex.idKey]
-            vertex.status = VerticesTokens.isSelected
-            self.isSelectingVertexMode = True
-
-    def stopVertexSelectingMode(self):
-        vertex = self.vertices[self.selectedVertex]
-        vertex.status = VerticesTokens.isDefault
-        self.isSelectingVertexMode = False
-
-    def isSelectedVertex(self, v: Vertex):
-        if self.isSelectingVertexMode:
-            return self.verticesPositionsMap[v.idKey] == self.selectedVertex
-        return False
-
-    def _alignVertexOnScreen(self, vertex):
-        r = VerticesDiments.radius
-        if vertex.pos.x - r < 0: vertex.pos.x = 0 + r
-        if vertex.pos.x + r > self.width: vertex.pos.x = self.width - r
-        if vertex.pos.y - r < 0: vertex.pos.y = 0 + r
-        if vertex.pos.y + r > self.height: vertex.pos.y = self.height - r
-
-    def _separateFromOtherVertices(self, vertex):
-        for u in self.vertices:
-            if vertex == u: continue
-            if not self.isSelectedVertex(u):
-                intersection = self.isVerticesIntersecting(vertex, u, VerticesDiments.intersectionRadius)
-                if intersection:  u.moveAwayFrom(vertex, intersection)
-
-    @staticmethod
-    def generateVerticesCanFitIn(width, height):
-        c, r = ((width // (VerticesDiments.radius * 2)) // 2) + 1, (
-                (height // (VerticesDiments.radius * 2)) // 2)
-        vertices = [Vertex(i, Pos(((i % c) * (width // c)),
-                                  ((i // c) * (height // r))))
-                    for i in range(c * r)]
-        return vertices
-
-    def setupVertices(self):
-        for vertex in self.vertices:
-            if vertex.isMoved:
-                self._separateFromOtherVertices(vertex)
-                self._alignVertexOnScreen(vertex)
-
-    def _drawEdge(self, edge):
-        pg.draw.line(self.screen, EdgesColors.default,
-                     self.vertices[self.verticesPositionsMap[edge.start]].pos.location(),
-                     self.vertices[self.verticesPositionsMap[edge.end]].pos.location(), EdgesDiments.width)
-
-    def _limitVerticesOfEdge(self, edge):
-        start: Vertex = self.vertices[self.verticesPositionsMap[edge.start]]
-        end: Vertex = self.vertices[self.verticesPositionsMap[edge.end]]
-        intersection = self.getVerticesIntersection(start, end, EdgesDiments.length)
-        if intersection > 0:
-            end.moveCloserTo(start, intersection)
-            start.moveCloserTo(end, intersection)
-            self._alignVertexOnScreen(end)
-            self._alignVertexOnScreen(start)
-
-    def setupEdges(self):
-        for edge in self.edges:
-            self._limitVerticesOfEdge(edge)
-
-    def drawEdges(self):
-        for edge in self.edges:
-            self._drawEdge(edge)
-
-    def drawVertices(self):
-        for vertex in self.vertices:
-            if vertex.isMoved:
-                self._separateFromOtherVertices(vertex)
-                self._alignVertexOnScreen(vertex)
-            self._drawVertex(vertex)
+        self.graphManger.moveSelectedVertexTo(mx, my)
 
 
 if __name__ == '__main__':
