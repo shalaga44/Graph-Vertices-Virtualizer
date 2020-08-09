@@ -10,7 +10,7 @@ from Colors import MainColors
 from DataTypes import Pos
 from Diments import Diments
 from Tokens import VerticesTokens
-from views import Vertex
+from views import Vertex, Edge
 
 
 class Visualizer:
@@ -29,9 +29,12 @@ class Visualizer:
         self.screen = pg.display.set_mode(self.displaySize)
         self.selectedVertex = 0
         self.isSelectingVertexMode = False
-        self.vertices = []
-        self.vertices.extend(self.generateVerticesCanFitIn(self.width, self.height))
-        self.verticesPositionsMap = {self.vertices[i].idKey: i for i in range(len(self.vertices))}
+        self.vertices = [Vertex(44, Pos(*self.displaySizeHalf)), Vertex(999, Pos(*self.displaySizeHalf))]
+        # self.vertices.extend(self.generateVerticesCanFitIn(self.width, self.height))
+        self.verticesPositionsMap: dict[int:int] = {self.vertices[i].idKey: i for i in range(len(self.vertices))}
+        self.edges = [Edge(44, 999)]
+        # self.edges.extend(self.generateVerticesCanFitIn(self.width, self.height))
+        self.edgesPositionsMap = {self.edges[i]: i for i in range(len(self.edges))}
 
     def events(self):
         for event in pg.event.get():
@@ -56,12 +59,11 @@ class Visualizer:
     def main(self):
         while True:
             self.events()
-            # self.separateVertices()
-            for vertex in self.vertices:
-                if vertex.isMoved:
-                    self.separateFromOtherVertices(vertex)
-                    self.alignVertexOnScreen(vertex)
-                self.drawVertex(vertex)
+
+            for edge in self.edges:
+                self.drawEdge(edge)
+
+            self.setupAndDrawVertices()
 
             self.updateDisplay()
 
@@ -184,6 +186,18 @@ class Visualizer:
                                   ((i // c) * (height // r))))
                     for i in range(c * r)]
         return vertices
+
+    def setupAndDrawVertices(self):
+        for vertex in self.vertices:
+            if vertex.isMoved:
+                self.separateFromOtherVertices(vertex)
+                self.alignVertexOnScreen(vertex)
+            self.drawVertex(vertex)
+
+    def drawEdge(self, edge):
+        pg.draw.line(self.screen, (0, 0, 0),
+                     self.vertices[self.verticesPositionsMap[edge.start]].pos.location(),
+                     self.vertices[self.verticesPositionsMap[edge.end]].pos.location(), 5)
 
 
 if __name__ == '__main__':

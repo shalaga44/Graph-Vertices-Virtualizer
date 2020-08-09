@@ -113,3 +113,9 @@ class Vertex:
         elif self.status == VerticesTokens.isMoving:
             color = Colors.VerticesColors.isMoving
         self._color = color
+
+
+class Edge:
+    def __init__(self, fromNodeId, toNodeId):
+        self.start = fromNodeId
+        self.end = toNodeId
