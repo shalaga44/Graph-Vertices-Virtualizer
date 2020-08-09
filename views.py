@@ -1,6 +1,6 @@
 import itertools
 from copy import deepcopy
-
+import random
 from pygame.surface import Surface
 from pygame.font import SysFont
 from pygame.font import get_default_font
@@ -101,8 +101,8 @@ class Vertex:
 
     @staticmethod
     def randomThingIDoNotKnowWhatToNameItForNow():
-        for bla in list(sorted(itertools.permutations([-5, 0, 5], 2))):
-            yield bla
+        bla = random.choice(list(itertools.permutations([-5, 0, 5], 2)))
+        yield bla
 
     def updateColor(self):
         color = Colors.MainColors.onSurfaceColor

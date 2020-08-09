@@ -30,13 +30,12 @@ class Visualizer:
         self.selectedVertex = 0
         self.isSelectingVertexMode = False
         self.vertices = []
-        self.vertices = [Vertex(44, Pos(*self.displaySizeHalf)), Vertex(-1, Pos(*self.displaySizeHalf)),
-                         Vertex(999, Pos(*self.displaySizeHalf))]
+        self.vertices = [Vertex(44, Pos(*self.displaySizeHalf)),Vertex(0, Pos(*self.displaySizeHalf)), Vertex(-1, Pos(*self.displaySizeHalf)),Vertex(999, Pos(*self.displaySizeHalf))]
         # self.vertices.extend(self.generateVerticesCanFitIn(self.width, self.height))
         self.verticesPositionsMap: dict[int:int] = {self.vertices[i].idKey: i for i in range(len(self.vertices))}
         self.edges = []
-        self.edges = [Edge(44, 999), Edge(999, 44)]
-        # self.edges = [Edge(44, 999),Edge(-1, 999),Edge(44, -1)]
+        # self.edges = [Edge(44, 999)]
+        self.edges = [Edge(44, 999),Edge(0, 999),Edge(44, 0)]
         # self.edges.extend(self.generateVerticesCanFitIn(self.width, self.height))
         self.edgesPositionsMap = {self.edges[i]: i for i in range(len(self.edges))}
 
@@ -184,7 +183,7 @@ class Visualizer:
         for u in self.vertices:
             if vertex == u: continue
             if not self.isSelectedVertex(u):
-                intersection = self.isVerticesIntersecting(vertex, u,VerticesDiments.intersectionRadius)
+                intersection = self.isVerticesIntersecting(vertex, u, VerticesDiments.intersectionRadius)
                 if intersection:  u.moveAwayFrom(vertex, intersection)
 
     @staticmethod
@@ -214,6 +213,7 @@ class Visualizer:
         intersection = self.getVerticesIntersection(start, end, EdgesDiments.length)
         if intersection > 0:
             end.moveCloserTo(start, intersection)
+            start.moveCloserTo(end, intersection)
 
 
 if __name__ == '__main__':
