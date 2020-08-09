@@ -8,3 +8,7 @@ class VerticesColors:
 class MainColors:
     surfaceColor = (255, 255, 255)
     onSurfaceColor = (0, 0, 0)
+
+
+class EdgesColors:
+    default = MainColors.onSurfaceColor

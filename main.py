@@ -6,9 +6,9 @@ from typing import Optional
 import pygame as pg
 import math
 
-from Colors import MainColors
+from Colors import MainColors, EdgesColors
 from DataTypes import Pos
-from Diments import Diments
+from Dimensions import VerticesDiments, EdgesDiments
 from Tokens import VerticesTokens
 from views import Vertex, Edge
 
@@ -20,7 +20,7 @@ class Visualizer:
         self.mouseThread = Thread(target=self.mouse)
         self.mainThread = Thread(target=self.main)
         pg.init()
-        self.width, self.height = 1280, 720
+        self.width, self.height = 720, 720
         self.displaySize = (self.width, self.height)
         self.displaySizeHalf = (self.width // 2, self.height // 2)
         self.clock = pg.time.Clock()
@@ -29,10 +29,14 @@ class Visualizer:
         self.screen = pg.display.set_mode(self.displaySize)
         self.selectedVertex = 0
         self.isSelectingVertexMode = False
-        self.vertices = [Vertex(44, Pos(*self.displaySizeHalf)), Vertex(999, Pos(*self.displaySizeHalf))]
+        self.vertices = []
+        self.vertices = [Vertex(44, Pos(*self.displaySizeHalf)), Vertex(-1, Pos(*self.displaySizeHalf)),
+                         Vertex(999, Pos(*self.displaySizeHalf))]
         # self.vertices.extend(self.generateVerticesCanFitIn(self.width, self.height))
         self.verticesPositionsMap: dict[int:int] = {self.vertices[i].idKey: i for i in range(len(self.vertices))}
-        self.edges = [Edge(44, 999)]
+        self.edges = []
+        self.edges = [Edge(44, 999), Edge(999, 44)]
+        # self.edges = [Edge(44, 999),Edge(-1, 999),Edge(44, -1)]
         # self.edges.extend(self.generateVerticesCanFitIn(self.width, self.height))
         self.edgesPositionsMap = {self.edges[i]: i for i in range(len(self.edges))}
 
@@ -61,6 +65,7 @@ class Visualizer:
             self.events()
 
             for edge in self.edges:
+                self.limitVerticesOfEdge(edge)
                 self.drawEdge(edge)
 
             self.setupAndDrawVertices()
@@ -78,7 +83,7 @@ class Visualizer:
         self.screen.blit(vertex.textImage, vertex.textPos)
 
     def _drawVertexCircle(self, vertex: Vertex):
-        pg.draw.circle(self.screen, vertex.color, vertex.pos.location(), Diments.vertexRadius)
+        pg.draw.circle(self.screen, vertex.color, vertex.pos.location(), VerticesDiments.radius)
 
     def startMouseThread(self):
         self.mouseThread.daemon = False
@@ -96,7 +101,7 @@ class Visualizer:
                     self.startVertexSelectingMode()
 
     def getClickedVertexAt(self, p: Pos) -> Optional[Vertex]:
-        r = Diments.vertexRadius
+        r = VerticesDiments.radius
         for c in self.vertices:
             if self.isPointInCircle(p.x, p.y, c.pos.x, c.pos.y, r):
                 return c
@@ -118,17 +123,23 @@ class Visualizer:
         if vertex is not None:
             self.startVertexSelectingMode(vertex)
 
-    def separateVertices(self):
-        for vertex in self.vertices:
-            for u in self.vertices:
-                if vertex == u: continue
-                if not self.isSelectedVertex(u):
-                    intersection = self.isVerticesIntersecting(vertex, u)
-                    if intersection:  u.moveAwayFrom(vertex, intersection)
+    # def separateVertices(self):
+    #     for vertex in self.vertices:
+    #         for u in self.vertices:
+    #             if vertex == u: continue
+    #             if not self.isSelectedVertex(u):
+    #                 intersection = self.isVerticesIntersecting(vertex, u, VerticesDiments.intersectionRadius)
+    #                 if intersection:  u.moveAwayFrom(vertex, intersection)
 
-    def isVerticesIntersecting(self, v, u):
-        r = Diments.vertexRadius * 2
-        return self.isCirclesIntersecting(v.pos.x, v.pos.y, u.pos.x, u.pos.y, r, r)
+    def isVerticesIntersecting(self, v: Vertex, u: Vertex, radius: int):
+        intersection = self.getCirclesIntersection(v.pos.x, v.pos.y, u.pos.x, u.pos.y, radius, radius)
+        if intersection < 0:
+            return intersection
+        return False
+
+    def getVerticesIntersection(self, v: Vertex, u: Vertex, radius: int):
+        intersection = self.getCirclesIntersection(v.pos.x, v.pos.y, u.pos.x, u.pos.y, radius, radius)
+        return intersection
 
     @staticmethod
     def isPointInCircle(pX, pY, cX, cY, r):
@@ -137,13 +148,11 @@ class Visualizer:
         return False
 
     @staticmethod
-    def isCirclesIntersecting(x1, y1, x2, y2, r1, r2):
+    def getCirclesIntersection(x1, y1, x2, y2, r1, r2):
         distSq = (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)
         radSumSq = (r1 + r2) * (r1 + r2)
         intersection = distSq - radSumSq
-        if intersection < 0:
-            return intersection
-        return 0
+        return intersection
 
     def startVertexSelectingMode(self, vertex=None):
         if vertex is None:
@@ -165,7 +174,7 @@ class Visualizer:
         return False
 
     def alignVertexOnScreen(self, vertex):
-        r = Diments.vertexRadius
+        r = VerticesDiments.radius
         if vertex.pos.x - r < 0: vertex.pos.x = 0 + r
         if vertex.pos.x + r > self.width: vertex.pos.x = self.width - r
         if vertex.pos.y - r < 0: vertex.pos.y = 0 + r
@@ -175,13 +184,13 @@ class Visualizer:
         for u in self.vertices:
             if vertex == u: continue
             if not self.isSelectedVertex(u):
-                intersection = self.isVerticesIntersecting(vertex, u)
+                intersection = self.isVerticesIntersecting(vertex, u,VerticesDiments.intersectionRadius)
                 if intersection:  u.moveAwayFrom(vertex, intersection)
 
     @staticmethod
     def generateVerticesCanFitIn(width, height):
-        c, r = ((width // (Diments.vertexRadius * 2)) // 2) + 1, (
-                (height // (Diments.vertexRadius * 2)) // 2)
+        c, r = ((width // (VerticesDiments.radius * 2)) // 2) + 1, (
+                (height // (VerticesDiments.radius * 2)) // 2)
         vertices = [Vertex(i, Pos(((i % c) * (width // c)),
                                   ((i // c) * (height // r))))
                     for i in range(c * r)]
@@ -195,9 +204,16 @@ class Visualizer:
             self.drawVertex(vertex)
 
     def drawEdge(self, edge):
-        pg.draw.line(self.screen, (0, 0, 0),
+        pg.draw.line(self.screen, EdgesColors.default,
                      self.vertices[self.verticesPositionsMap[edge.start]].pos.location(),
-                     self.vertices[self.verticesPositionsMap[edge.end]].pos.location(), 5)
+                     self.vertices[self.verticesPositionsMap[edge.end]].pos.location(), EdgesDiments.width)
+
+    def limitVerticesOfEdge(self, edge):
+        start: Vertex = self.vertices[self.verticesPositionsMap[edge.start]]
+        end: Vertex = self.vertices[self.verticesPositionsMap[edge.end]]
+        intersection = self.getVerticesIntersection(start, end, EdgesDiments.length)
+        if intersection > 0:
+            end.moveCloserTo(start, intersection)
 
 
 if __name__ == '__main__':

@@ -7,7 +7,7 @@ from pygame.font import get_default_font
 
 import Colors
 from DataTypes import Pos
-from Diments import Diments
+from Dimensions import VerticesDiments
 from Tokens import VerticesTokens
 
 
@@ -25,7 +25,7 @@ class Vertex:
         self.textImage = self.getTextImage()
 
     def getTextImage(self) -> Surface:
-        font = SysFont(get_default_font(), Diments.fontSizeOnVertex)
+        font = SysFont(get_default_font(), VerticesDiments.fontSize)
         keyImage = font.render(str(self.idKey), True, Colors.VerticesColors.OnVertexDefaultColor)
         wText, hText = font.size(str(self.idKey))
         self.wTextHalf, self.hTextHalf = wText // 2, hText // 2
@@ -113,6 +113,16 @@ class Vertex:
         elif self.status == VerticesTokens.isMoving:
             color = Colors.VerticesColors.isMoving
         self._color = color
+
+    def moveCloserTo(self, v, distance):
+
+        diffX = v.pos.x - self.pos.x
+        diffY = v.pos.y - self.pos.y
+        moveX = diffX * distance / 100000
+        moveY = diffY * distance / 100000
+        self.pos.x += moveX
+        self.pos.y += moveY
+        self.isMoved = True
 
 
 class Edge:
