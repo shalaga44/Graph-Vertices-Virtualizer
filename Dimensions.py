@@ -10,4 +10,4 @@ class VerticesDiments:
 
 class EdgesDiments:
     width = 5
-    length = VerticesDiments.intersectionRadius+10
+    length = VerticesDiments.radius*3

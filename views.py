@@ -7,7 +7,7 @@ from pygame.font import get_default_font
 
 import Colors
 from DataTypes import Pos
-from Dimensions import VerticesDiments
+from Dimensions import VerticesDiments, EdgesDiments
 from Tokens import VerticesTokens
 
 
@@ -101,7 +101,7 @@ class Vertex:
 
     @staticmethod
     def randomThingIDoNotKnowWhatToNameItForNow():
-        bla = random.choice(list(itertools.permutations([-5, 0, 5], 2)))
+        bla = random.choice(list(itertools.permutations([-EdgesDiments.length, 0, EdgesDiments.length], 2)))
         yield bla
 
     def updateColor(self):

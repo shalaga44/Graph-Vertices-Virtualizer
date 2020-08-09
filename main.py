@@ -29,16 +29,19 @@ class Visualizer:
         self.screen = pg.display.set_mode(self.displaySize)
         self.selectedVertex = 0
         self.isSelectingVertexMode = False
-        self.vertices = []
-        self.vertices = [Vertex(44, Pos(*self.displaySizeHalf)), Vertex(0, Pos(*self.displaySizeHalf)),
-                         Vertex(-1, Pos(*self.displaySizeHalf)), Vertex(999, Pos(*self.displaySizeHalf))]
+        self.vertices: list[Vertex] = []
+        self.vertices.extend([Vertex(44, Pos(*self.displaySizeHalf)), Vertex(0, Pos(*self.displaySizeHalf)),
+                              Vertex(-1, Pos(*self.displaySizeHalf)), Vertex(999, Pos(*self.displaySizeHalf)),
+                              Vertex(-2, Pos(*self.displaySizeHalf)), Vertex(-3, Pos(*self.displaySizeHalf)),
+                              Vertex(-5, Pos(*self.displaySizeHalf)), Vertex(-4, Pos(*self.displaySizeHalf)),
+                              Vertex(-7, Pos(*self.displaySizeHalf)), Vertex(-8, Pos(*self.displaySizeHalf))])
         # self.vertices.extend(self.generateVerticesCanFitIn(self.width, self.height))
         self.verticesPositionsMap: dict[int:int] = {self.vertices[i].idKey: i for i in range(len(self.vertices))}
-        self.edges = []
-        # self.edges = [Edge(44, 999)]
-        self.edges = [Edge(44, 999), Edge(0, 999), Edge(44, 0)]
-        # self.edges.extend(self.generateVerticesCanFitIn(self.width, self.height))
-        self.edgesPositionsMap = {self.edges[i]: i for i in range(len(self.edges))}
+        self.edges: list[Edge] = []
+        # self.edges.extend([Edge(44, 999)])
+        self.edges.extend([Edge(44, 999), Edge(0, 999), Edge(44, 0), Edge(-7, 0), Edge(-8, 44),
+                           Edge(-2, -3), Edge(-3, -4), Edge(-4, -5), Edge(-5, -2)])
+        self.edgesPositionsMap: dict[int:int] = {self.edges[i]: i for i in range(len(self.edges))}
 
     def events(self):
         for event in pg.event.get():
