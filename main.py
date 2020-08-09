@@ -30,12 +30,13 @@ class Visualizer:
         self.selectedVertex = 0
         self.isSelectingVertexMode = False
         self.vertices = []
-        self.vertices = [Vertex(44, Pos(*self.displaySizeHalf)),Vertex(0, Pos(*self.displaySizeHalf)), Vertex(-1, Pos(*self.displaySizeHalf)),Vertex(999, Pos(*self.displaySizeHalf))]
+        self.vertices = [Vertex(44, Pos(*self.displaySizeHalf)), Vertex(0, Pos(*self.displaySizeHalf)),
+                         Vertex(-1, Pos(*self.displaySizeHalf)), Vertex(999, Pos(*self.displaySizeHalf))]
         # self.vertices.extend(self.generateVerticesCanFitIn(self.width, self.height))
         self.verticesPositionsMap: dict[int:int] = {self.vertices[i].idKey: i for i in range(len(self.vertices))}
         self.edges = []
         # self.edges = [Edge(44, 999)]
-        self.edges = [Edge(44, 999),Edge(0, 999),Edge(44, 0)]
+        self.edges = [Edge(44, 999), Edge(0, 999), Edge(44, 0)]
         # self.edges.extend(self.generateVerticesCanFitIn(self.width, self.height))
         self.edgesPositionsMap = {self.edges[i]: i for i in range(len(self.edges))}
 
@@ -63,15 +64,14 @@ class Visualizer:
         while True:
             self.events()
 
-            for edge in self.edges:
-                self.limitVerticesOfEdge(edge)
-                self.drawEdge(edge)
-
-            self.setupAndDrawVertices()
+            self.setupEdges()
+            self.setupVertices()
+            self.drawEdges()
+            self.drawVertices()
 
             self.updateDisplay()
 
-    def drawVertex(self, vertex: Vertex):
+    def _drawVertex(self, vertex: Vertex):
         CopiedVertex = deepcopy(vertex)
         self._drawVertexCircle(CopiedVertex)
         self._drawVertexText(CopiedVertex)
@@ -92,7 +92,7 @@ class Visualizer:
         while self.mainThreadIsRunning:
             if self.isSelectingVertexMode:
                 self.moveSelectedVertexToMouse()
-                self.separateFromOtherVertices(self.vertices[self.selectedVertex])
+                self._separateFromOtherVertices(self.vertices[self.selectedVertex])
             elif pg.mouse.get_pressed()[0]:
                 if self.isSelectingVertexMode:
                     self.stopVertexSelectingMode()
@@ -172,14 +172,14 @@ class Visualizer:
             return self.verticesPositionsMap[v.idKey] == self.selectedVertex
         return False
 
-    def alignVertexOnScreen(self, vertex):
+    def _alignVertexOnScreen(self, vertex):
         r = VerticesDiments.radius
         if vertex.pos.x - r < 0: vertex.pos.x = 0 + r
         if vertex.pos.x + r > self.width: vertex.pos.x = self.width - r
         if vertex.pos.y - r < 0: vertex.pos.y = 0 + r
         if vertex.pos.y + r > self.height: vertex.pos.y = self.height - r
 
-    def separateFromOtherVertices(self, vertex):
+    def _separateFromOtherVertices(self, vertex):
         for u in self.vertices:
             if vertex == u: continue
             if not self.isSelectedVertex(u):
@@ -195,25 +195,41 @@ class Visualizer:
                     for i in range(c * r)]
         return vertices
 
-    def setupAndDrawVertices(self):
+    def setupVertices(self):
         for vertex in self.vertices:
             if vertex.isMoved:
-                self.separateFromOtherVertices(vertex)
-                self.alignVertexOnScreen(vertex)
-            self.drawVertex(vertex)
+                self._separateFromOtherVertices(vertex)
+                self._alignVertexOnScreen(vertex)
 
-    def drawEdge(self, edge):
+    def _drawEdge(self, edge):
         pg.draw.line(self.screen, EdgesColors.default,
                      self.vertices[self.verticesPositionsMap[edge.start]].pos.location(),
                      self.vertices[self.verticesPositionsMap[edge.end]].pos.location(), EdgesDiments.width)
 
-    def limitVerticesOfEdge(self, edge):
+    def _limitVerticesOfEdge(self, edge):
         start: Vertex = self.vertices[self.verticesPositionsMap[edge.start]]
         end: Vertex = self.vertices[self.verticesPositionsMap[edge.end]]
         intersection = self.getVerticesIntersection(start, end, EdgesDiments.length)
         if intersection > 0:
             end.moveCloserTo(start, intersection)
             start.moveCloserTo(end, intersection)
+            self._alignVertexOnScreen(end)
+            self._alignVertexOnScreen(start)
+
+    def setupEdges(self):
+        for edge in self.edges:
+            self._limitVerticesOfEdge(edge)
+
+    def drawEdges(self):
+        for edge in self.edges:
+            self._drawEdge(edge)
+
+    def drawVertices(self):
+        for vertex in self.vertices:
+            if vertex.isMoved:
+                self._separateFromOtherVertices(vertex)
+                self._alignVertexOnScreen(vertex)
+            self._drawVertex(vertex)
 
 
 if __name__ == '__main__':
