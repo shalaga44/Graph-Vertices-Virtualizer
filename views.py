@@ -18,7 +18,6 @@ class Vertex:
 
     wTextHalf, hTextHalf = None, None
     lastIntersection = None
-    x = False
 
     def __init__(self, idKey: int, pos: Pos):
         self.idKey: int = idKey

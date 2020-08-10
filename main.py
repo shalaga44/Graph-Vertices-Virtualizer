@@ -28,13 +28,14 @@ class Visualizer:
         self.screen = pg.display.set_mode(self.displaySize)
         self.selectedVertex = 0
         self.graphManger: Final = GraphManager(*self.displaySize)
-        # self.graphManger.generateVerticesCanFitIn(*self.displaySizeHalf)
+        # self.graphManger.generateVerticesCanFitIn(*self.displaySize)
         self.graphManger.generate2ComponentsGraph()
 
     def main(self):
         while True:
             self.events()
 
+            self.graphManger.setupVertices()
             self.graphManger.setupEdges()
             self.graphManger.setupVertices()
             self.drawEdges()
@@ -77,11 +78,15 @@ class Visualizer:
                 elif (event.key == pg.K_LCTRL) or \
                         (event.type == pg.MOUSEBUTTONUP):
                     self.stopVertexSelectingMode()
+                elif event.key == pg.K_SPACE :
+                    self.startCrazySpanningMode()
 
     def updateDisplay(self):
         self.clock.tick(self.fps)
         pg.display.update()
         self.screen.fill(MainColors.surfaceColor)
+        pg.display.set_caption(f"Selection:{self.graphManger.isSelectingVertexMode},\t\t"
+                               f"Crazy Spanning:{self.graphManger.isCrazySpanningMode} ")
 
     def startMainThread(self):
         self.mainThread.daemon = False
@@ -113,6 +118,9 @@ class Visualizer:
     def moveSelectedVertexToMouse(self):
         mx, my = pg.mouse.get_pos()
         self.graphManger.moveSelectedVertexTo(mx, my)
+
+    def startCrazySpanningMode(self):
+        self.graphManger.startCrazySpanning()
 
 
 if __name__ == '__main__':

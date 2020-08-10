@@ -23,6 +23,7 @@ class GraphManager:
 
         self.selectedVertexId = 0
         self.isSelectingVertexMode = False
+        self.isCrazySpanningMode = True
         self.test_intersectionMap: Dict[int:List[bool]] = {}
 
     def generate2ComponentsGraph(self):
@@ -42,10 +43,14 @@ class GraphManager:
         self.vertices = [Vertex(i, Pos(((i % c) * (width // c)),
                                        ((i // c) * (height // r))))
                          for i in range(c * r)]
+        self._updateVerticesPositionsMap()
 
     def _updateVerticesPositionsMap(self):
         self.verticesPositionsMap: dict[int:int] = {self.vertices[i].idKey: i for i in range(len(self.vertices))}
         self.test_intersectionMap = {k: [True] * len(self.vertices) for k in self.verticesPositionsMap.keys()}
+        for k in self.test_intersectionMap:
+            p = self.verticesPositionsMap[k]
+            self.test_intersectionMap[k][p] = False
 
     def _updateEdgesPositionsMap(self):
         self.edgesPositionsMap: dict[int:int] = {self.edges[i]: i for i in range(len(self.edges))}
@@ -75,12 +80,17 @@ class GraphManager:
         if vertex.pos.y + r > self.height: vertex.pos.y = self.height - r
 
     def setupVertices(self):
+        allStopped = True
         for vertex in self.vertices:
             if vertex.isMoved:
                 self._separateFromOtherVertices(vertex)
                 self._alignVertexOnScreen(vertex)
-            if not self.isVertexIntersect(vertex):
+            if self.isVertexNotIntersected(vertex):
                 vertex.isMoved = False
+            else:
+                allStopped = False
+        if allStopped:
+            self.isCrazySpanningMode = False
 
     def _separateFromOtherVertices(self, vertex):
         # isIntersected = False
@@ -143,7 +153,8 @@ class GraphManager:
         self.isSelectingVertexMode = False
 
     def moveVertexAwayVertex(self, v: Vertex, u: Vertex, intersection):
-        self.fixVertexSameIntersection(v, intersection)
+        if self.isCrazySpanningMode:
+            self.fixVertexSameIntersection(v, intersection)
 
         diffX = u.pos.x - v.pos.x
         diffY = u.pos.y - v.pos.y
@@ -160,7 +171,7 @@ class GraphManager:
             v.pos.y += diffY
         v.lastIntersection = intersection
 
-    def isVertexIntersect(self, v: Vertex):
+    def isVertexNotIntersected(self, v: Vertex):
         return not any(self.test_intersectionMap[v.idKey])
 
     def markAsIntersected(self, v: Vertex, u: Vertex):
@@ -170,3 +181,9 @@ class GraphManager:
     def markAsNotIntersected(self, v: Vertex, u: Vertex):
         self.test_intersectionMap[v.idKey][self.verticesPositionsMap[u.idKey]] = False
         self.test_intersectionMap[u.idKey][self.verticesPositionsMap[v.idKey]] = False
+
+    def startCrazySpanning(self):
+        if self.isCrazySpanningMode:
+            self.isCrazySpanningMode = False
+        else:
+            self.isCrazySpanningMode = True
