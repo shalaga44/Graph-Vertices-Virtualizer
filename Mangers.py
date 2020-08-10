@@ -3,28 +3,31 @@ import random
 from typing import List, Tuple, Dict, Optional
 
 from DataTypes import Pos
-from Dimensions import VerticesDiments, EdgesDiments
+# from Dimensions import VerticesDiments, EdgesDiments, MainDiments
+from Dimensions import MainDiments
 from LinearMath import getVerticesIntersection, isVerticesIntersecting, isPointInCircle
+from SingletonMetaClass import Singleton
 from Tokens import VerticesTokens
 from views import Vertex, Edge
 
 
-class GraphManager:
+class GraphManager(metaclass=Singleton):
     def __init__(self, width, height):
         self.edges: List[Edge] = []
         self.vertices: List[Vertex] = []
 
-        self.verticesPositionsMap: Dict[int:int] = {}
         self.edgesPositionsMap: Dict[int:int] = {}
+        self.verticesPositionsMap: Dict[int:int] = {}
 
         self.width, self.height = width, height
         self.displaySize: Tuple[int, ...] = (width, height)
         self.displaySizeHalf: Tuple[int, ...] = (width // 2, height // 2)
 
         self.selectedVertexId = 0
-        self.isSelectingVertexMode = False
         self.isCrazySpanningMode = True
+        self.isSelectingVertexMode = False
         self.test_intersectionMap: Dict[int:List[bool]] = {}
+        self.dimentsManger = DimensionsManger()
 
     def generate2ComponentsGraph(self):
         self.vertices = [Vertex(44, Pos(*self.displaySizeHalf)), Vertex(0, Pos(*self.displaySizeHalf)),
@@ -38,8 +41,8 @@ class GraphManager:
         self._updateEdgesPositionsMap()
 
     def generateVerticesCanFitIn(self, width, height):
-        c, r = ((width // (VerticesDiments.radius * 2)) // 2) + 1, (
-                (height // (VerticesDiments.radius * 2)) // 2)
+        c, r = ((width // (self.dimentsManger.VerticesDiments.radius * 2)) // 2) + 1, (
+                (height // (self.dimentsManger.VerticesDiments.radius * 2)) // 2)
         self.vertices = [Vertex(i, Pos(((i % c) * (width // c)),
                                        ((i // c) * (height // r))))
                          for i in range(c * r)]
@@ -62,18 +65,22 @@ class GraphManager:
     def _limitVerticesOfEdge(self, edge):
         start: Vertex = self.vertices[self.verticesPositionsMap[edge.start]]
         end: Vertex = self.vertices[self.verticesPositionsMap[edge.end]]
-        intersection = getVerticesIntersection(start, end, EdgesDiments.length)
+        intersection = getVerticesIntersection(start, end, self.dimentsManger.EdgesDiments.length)
         if intersection > 0:
             end.moveCloserTo(start, intersection)
             start.moveCloserTo(end, intersection)
             self._alignVertexOnScreen(end)
             self._alignVertexOnScreen(start)
-        # else:
-        # start.isMoved = False
-        # end.isMoved = False
+            self.markAsIntersected(start, end)
+
+        else:
+            # pass
+            self.markAsNotIntersected(start, end)
+            # start.isMoved = False
+            # end.isMoved = False
 
     def _alignVertexOnScreen(self, vertex):
-        r = VerticesDiments.radius
+        r = self.dimentsManger.VerticesDiments.radius
         if vertex.pos.x - r < 0: vertex.pos.x = 0 + r
         if vertex.pos.x + r > self.width: vertex.pos.x = self.width - r
         if vertex.pos.y - r < 0: vertex.pos.y = 0 + r
@@ -97,7 +104,7 @@ class GraphManager:
         for u in self.vertices:
             if vertex == u: continue
             if not self.isSelectedVertex(u):
-                intersection = isVerticesIntersecting(vertex, u, VerticesDiments.intersectionRadius)
+                intersection = isVerticesIntersecting(vertex, u, self.dimentsManger.VerticesDiments.intersectionRadius)
                 if intersection:
                     self.moveVertexAwayVertex(u, vertex, intersection)
                     self.markAsIntersected(u, vertex)
@@ -118,7 +125,8 @@ class GraphManager:
         selectedVertex.pos.y = y
         for u in self.vertices:
             if selectedVertex == u: continue
-            intersection = isVerticesIntersecting(selectedVertex, u, VerticesDiments.intersectionRadius)
+            intersection = isVerticesIntersecting(selectedVertex, u,
+                                                  self.dimentsManger.VerticesDiments.intersectionRadius)
             if intersection:
                 self.moveVertexAwayVertex(u, selectedVertex, intersection)
                 self.markAsIntersected(u, selectedVertex)
@@ -131,7 +139,7 @@ class GraphManager:
         self.isSelectingVertexMode = True
 
     def getClickedVertexAt(self, p: Pos) -> Optional[Vertex]:
-        r = VerticesDiments.radius
+        r = self.dimentsManger.VerticesDiments.radius
         for c in self.vertices:
             if isPointInCircle(p.x, p.y, c.pos.x, c.pos.y, r):
                 return c
@@ -166,7 +174,7 @@ class GraphManager:
         if intersection == v.lastIntersection:
             diffX, diffY = random.choice(
                 list(itertools.permutations(
-                    [-EdgesDiments.length, 0, EdgesDiments.length], 2)))
+                    [-self.dimentsManger.EdgesDiments.length, 0, self.dimentsManger.EdgesDiments.length], 2)))
             v.pos.x += diffX
             v.pos.y += diffY
         v.lastIntersection = intersection
@@ -187,3 +195,35 @@ class GraphManager:
             self.isCrazySpanningMode = False
         else:
             self.isCrazySpanningMode = True
+
+
+class DimensionsManger(metaclass=Singleton):
+    def __init__(self):
+        self.isChanged = False
+        self._scaleFactor = MainDiments.scaleFactor = .9
+        self.updateScales()
+
+    @property
+    def scaleFactor(self):
+        return self._scaleFactor
+
+    @scaleFactor.setter
+    def scaleFactor(self, a):
+        self._scaleFactor = a
+        self.updateScales()
+
+    class VerticesDiments:
+        radius: int
+        fontSize: int
+        intersectionRadius: int
+
+    class EdgesDiments:
+        width: int
+        length: int
+
+    def updateScales(self):
+        self.VerticesDiments.radius = int(25 * self.scaleFactor)
+        self.VerticesDiments.fontSize = int(30 * self.scaleFactor)
+        self.VerticesDiments.intersectionRadius = self.VerticesDiments.radius * 2
+        self.EdgesDiments.width = int(5 * self.scaleFactor)
+        self.EdgesDiments.length = self.VerticesDiments.radius * 3

@@ -1,13 +1,13 @@
 import itertools
 from copy import deepcopy
 import random
-from pygame.surface import Surface
 from pygame.font import SysFont
 from pygame.font import get_default_font
+from pygame.surface import Surface
 
 import Colors
 from DataTypes import Pos
-from Dimensions import VerticesDiments, EdgesDiments
+from Dimensions import VerticesDiments
 from Tokens import VerticesTokens
 
 
@@ -18,11 +18,12 @@ class Vertex:
 
     wTextHalf, hTextHalf = None, None
     lastIntersection = None
+    textImage: Surface
 
     def __init__(self, idKey: int, pos: Pos):
         self.idKey: int = idKey
         self._pos: Pos = pos
-        self.textImage = self.getTextImage()
+        self.generateNewTextImage()
 
     @property
     def pos(self):
@@ -33,12 +34,15 @@ class Vertex:
         self.isMoved = True
         self.pos = newPos
 
-    def getTextImage(self) -> Surface:
-        font = SysFont(get_default_font(), VerticesDiments.fontSize)
+    def generateNewTextImage(self):
+        from Mangers import DimensionsManger
+        diments = DimensionsManger()
+        font = SysFont(get_default_font(), diments.VerticesDiments.fontSize)
         keyImage = font.render(str(self.idKey), True, Colors.VerticesColors.OnVertexDefaultColor)
         wText, hText = font.size(str(self.idKey))
         self.wTextHalf, self.hTextHalf = wText // 2, hText // 2
-        return keyImage
+        self.textImage = keyImage
+        self.isMoved =True
 
     @property
     def textPos(self):

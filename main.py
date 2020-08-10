@@ -7,8 +7,7 @@ import pygame as pg
 
 from Colors import MainColors, EdgesColors
 from DataTypes import Pos
-from Dimensions import VerticesDiments, EdgesDiments
-from Mangers import GraphManager
+from Mangers import GraphManager, DimensionsManger
 from views import Vertex
 
 
@@ -19,6 +18,7 @@ class Visualizer:
         self.mouseThread = Thread(target=self.mouse)
         self.mainThread = Thread(target=self.main)
         pg.init()
+        # self.width, self.height = 562, 1000
         self.width, self.height = 720, 720
         self.displaySize = (self.width, self.height)
         self.displaySizeHalf = (self.width // 2, self.height // 2)
@@ -28,6 +28,7 @@ class Visualizer:
         self.screen = pg.display.set_mode(self.displaySize)
         self.selectedVertex = 0
         self.graphManger: Final = GraphManager(*self.displaySize)
+        self.dimentsManger = DimensionsManger()
         # self.graphManger.generateVerticesCanFitIn(*self.displaySize)
         self.graphManger.generate2ComponentsGraph()
 
@@ -37,7 +38,6 @@ class Visualizer:
 
             self.graphManger.setupEdges()
             self.graphManger.setupVertices()
-            # self.graphManger.setupVertices()
             self.drawEdges()
             self.drawVertices()
 
@@ -63,7 +63,7 @@ class Visualizer:
         pg.draw.line(self.screen, EdgesColors.default,
                      self.graphManger.vertices[self.graphManger.verticesPositionsMap[edge.start]].pos.location(),
                      self.graphManger.vertices[self.graphManger.verticesPositionsMap[edge.end]].pos.location(),
-                     EdgesDiments.width)
+                     self.dimentsManger.EdgesDiments.width)
 
     def events(self):
         for event in pg.event.get():
@@ -78,14 +78,19 @@ class Visualizer:
                 elif (event.key == pg.K_LCTRL) or \
                         (event.type == pg.MOUSEBUTTONUP):
                     self.stopVertexSelectingMode()
-                elif event.key == pg.K_SPACE :
+                elif event.key == pg.K_SPACE:
                     self.startCrazySpanningMode()
+                elif event.key == pg.K_EQUALS:
+                    self.scaleFactorUp()
+                elif event.key == pg.K_MINUS:
+                    self.scaleFactorDown()
 
     def updateDisplay(self):
         self.clock.tick(self.fps)
         pg.display.update()
         self.screen.fill(MainColors.surfaceColor)
-        pg.display.set_caption(f"Selection:{self.graphManger.isSelectingVertexMode},\t\t"
+        pg.display.set_caption(f"scale:{self.dimentsManger.scaleFactor},\t\t"
+                               f"Selection:{self.graphManger.isSelectingVertexMode},\t\t"
                                f"Crazy Spanning:{self.graphManger.isCrazySpanningMode} ")
 
     def startMainThread(self):
@@ -101,7 +106,7 @@ class Visualizer:
         self.screen.blit(vertex.textImage, vertex.textPos)
 
     def _drawVertexCircle(self, vertex: Vertex):
-        pg.draw.circle(self.screen, vertex.color, vertex.pos.location(), VerticesDiments.radius)
+        pg.draw.circle(self.screen, vertex.color, vertex.pos.location(), self.dimentsManger.VerticesDiments.radius)
 
     def drawEdges(self):
         for edge in self.graphManger.edges:
@@ -121,6 +126,17 @@ class Visualizer:
 
     def startCrazySpanningMode(self):
         self.graphManger.startCrazySpanning()
+
+    def scaleFactorUp(self):
+        self.dimentsManger.scaleFactor += .5
+        for v in self.graphManger.vertices:
+            v.generateNewTextImage()
+
+    def scaleFactorDown(self):
+        if self.dimentsManger.scaleFactor > .1:
+            self.dimentsManger.scaleFactor -= .1
+            for v in self.graphManger.vertices:
+                v.generateNewTextImage()
 
 
 if __name__ == '__main__':
