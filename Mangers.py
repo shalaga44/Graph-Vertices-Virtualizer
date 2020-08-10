@@ -27,11 +27,11 @@ class GraphManager:
         self.test_intersectionMap: Dict[int:List[bool]] = {}
 
     def generate2ComponentsGraph(self):
-        self.vertices = [Vertex(44, Pos(*self.displaySize)), Vertex(0, Pos(*self.displaySize)),
-                         Vertex(-1, Pos(*self.displaySize)), Vertex(999, Pos(*self.displaySize)),
-                         Vertex(-2, Pos(*self.displaySize)), Vertex(-3, Pos(*self.displaySize)),
-                         Vertex(-5, Pos(*self.displaySize)), Vertex(-4, Pos(*self.displaySize)),
-                         Vertex(-7, Pos(*self.displaySize)), Vertex(-8, Pos(*self.displaySize))]
+        self.vertices = [Vertex(44, Pos(*self.displaySizeHalf)), Vertex(0, Pos(*self.displaySizeHalf)),
+                         Vertex(-1, Pos(*self.displaySizeHalf)), Vertex(999, Pos(*self.displaySizeHalf)),
+                         Vertex(-2, Pos(*self.displaySizeHalf)), Vertex(-3, Pos(*self.displaySizeHalf)),
+                         Vertex(-5, Pos(*self.displaySizeHalf)), Vertex(-4, Pos(*self.displaySizeHalf)),
+                         Vertex(-7, Pos(*self.displaySizeHalf)), Vertex(-8, Pos(*self.displaySizeHalf))]
         self.edges = [Edge(44, 999), Edge(0, 999), Edge(44, 0), Edge(-7, 0), Edge(-8, 44),
                       Edge(-2, -3), Edge(-3, -4), Edge(-4, -5), Edge(-5, -2)]
         self._updateVerticesPositionsMap()

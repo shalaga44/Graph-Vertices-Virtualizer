@@ -35,9 +35,9 @@ class Visualizer:
         while True:
             self.events()
 
-            self.graphManger.setupVertices()
             self.graphManger.setupEdges()
             self.graphManger.setupVertices()
+            # self.graphManger.setupVertices()
             self.drawEdges()
             self.drawVertices()
 
