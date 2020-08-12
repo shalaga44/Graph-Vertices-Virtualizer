@@ -1,13 +1,10 @@
-import itertools
 from copy import deepcopy
-import random
 from pygame.font import SysFont
 from pygame.font import get_default_font
 from pygame.surface import Surface
 
 import Colors
 from DataTypes import Pos
-from Dimensions import VerticesDiments
 from Tokens import VerticesTokens
 
 
@@ -35,7 +32,7 @@ class Vertex:
         self.pos = newPos
 
     def generateNewTextImage(self):
-        from Mangers import DimensionsManger
+        from Mangers.GraphManager import DimensionsManger
         diments = DimensionsManger()
         font = SysFont(get_default_font(), diments.VerticesDiments.fontSize)
         keyImage = font.render(str(self.idKey), True, Colors.VerticesColors.OnVertexDefaultColor)

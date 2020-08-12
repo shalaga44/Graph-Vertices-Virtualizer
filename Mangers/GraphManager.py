@@ -4,8 +4,9 @@ from typing import List, Tuple, Dict, Optional
 
 from DataTypes import Pos
 # from Dimensions import VerticesDiments, EdgesDiments, MainDiments
-from Dimensions import MainDiments
 from LinearMath import getVerticesIntersection, isVerticesIntersecting, isPointInCircle
+from Mangers.DimensionsManger import DimensionsManger
+from Mangers.GraphGenerator import GraphGenerator
 from SingletonMetaClass import Singleton
 from Tokens import VerticesTokens
 from views import Vertex, Edge
@@ -29,34 +30,13 @@ class GraphManager(metaclass=Singleton):
         self.test_intersectionMap: Dict[int:List[bool]] = {}
         self.dimentsManger = DimensionsManger()
 
-    def generate2ComponentsGraph(self):
-        self.vertices = [Vertex(44, Pos(*self.displaySizeHalf)), Vertex(0, Pos(*self.displaySizeHalf)),
-                         Vertex(-1, Pos(*self.displaySizeHalf)), Vertex(999, Pos(*self.displaySizeHalf)),
-                         Vertex(-2, Pos(*self.displaySizeHalf)), Vertex(-3, Pos(*self.displaySizeHalf)),
-                         Vertex(-5, Pos(*self.displaySizeHalf)), Vertex(-4, Pos(*self.displaySizeHalf)),
-                         Vertex(-7, Pos(*self.displaySizeHalf)), Vertex(-8, Pos(*self.displaySizeHalf))]
-        self.edges = [Edge(44, 999), Edge(0, 999), Edge(44, 0), Edge(-7, 0), Edge(-8, 44),
-                      Edge(-2, -3), Edge(-3, -4), Edge(-4, -5), Edge(-5, -2)]
-        self._updateVerticesPositionsMap()
-        self._updateEdgesPositionsMap()
-
-    def generateVerticesCanFitIn(self, width, height):
-        c, r = ((width // (self.dimentsManger.VerticesDiments.radius * 2)) // 2) + 1, (
-                (height // (self.dimentsManger.VerticesDiments.radius * 2)) // 2)
-        self.vertices = [Vertex(i, Pos(((i % c) * (width // c)),
-                                       ((i // c) * (height // r))))
-                         for i in range(c * r)]
-        self._updateVerticesPositionsMap()
-
-    def _updateVerticesPositionsMap(self):
-        self.verticesPositionsMap: dict[int:int] = {self.vertices[i].idKey: i for i in range(len(self.vertices))}
-        self.test_intersectionMap = {k: [True] * len(self.vertices) for k in self.verticesPositionsMap.keys()}
-        for k in self.test_intersectionMap:
-            p = self.verticesPositionsMap[k]
-            self.test_intersectionMap[k][p] = False
-
-    def _updateEdgesPositionsMap(self):
-        self.edgesPositionsMap: dict[int:int] = {self.edges[i]: i for i in range(len(self.edges))}
+        self.graphGenerator = GraphGenerator(*self.displaySize)
+        self.graphGenerator.generate2ComponentsGraph()
+        self.vertices = self.graphGenerator.vertices
+        self.edges = self.graphGenerator.edges
+        self.edgesPositionsMap = self.graphGenerator.edgesPositionsMap
+        self.verticesPositionsMap = self.graphGenerator.verticesPositionsMap
+        self.test_intersectionMap = self.graphGenerator.test_intersectionMap
 
     def setupEdges(self):
         for edge in self.edges:
@@ -195,35 +175,3 @@ class GraphManager(metaclass=Singleton):
             self.isCrazySpanningMode = False
         else:
             self.isCrazySpanningMode = True
-
-
-class DimensionsManger(metaclass=Singleton):
-    def __init__(self):
-        self.isChanged = False
-        self._scaleFactor = MainDiments.scaleFactor = .9
-        self.updateScales()
-
-    @property
-    def scaleFactor(self):
-        return self._scaleFactor
-
-    @scaleFactor.setter
-    def scaleFactor(self, a):
-        self._scaleFactor = a
-        self.updateScales()
-
-    class VerticesDiments:
-        radius: int
-        fontSize: int
-        intersectionRadius: int
-
-    class EdgesDiments:
-        width: int
-        length: int
-
-    def updateScales(self):
-        self.VerticesDiments.radius = int(25 * self.scaleFactor)
-        self.VerticesDiments.fontSize = int(30 * self.scaleFactor)
-        self.VerticesDiments.intersectionRadius = self.VerticesDiments.radius * 2
-        self.EdgesDiments.width = int(5 * self.scaleFactor)
-        self.EdgesDiments.length = self.VerticesDiments.radius * 3
