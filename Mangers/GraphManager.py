@@ -2,8 +2,9 @@ import itertools
 import random
 from typing import List, Tuple, Dict, Optional
 
-from DataTypes import Pos
+from DataTypes .Pos import Pos
 # from Dimensions import VerticesDiments, EdgesDiments, MainDiments
+from DataTypes.GraphHolder import GraphHolder
 from LinearMath import getVerticesIntersection, isVerticesIntersecting, isPointInCircle
 from Mangers.DimensionsManger import DimensionsManger
 from Mangers.GraphGenerator import GraphGenerator
@@ -17,8 +18,8 @@ class GraphManager(metaclass=Singleton):
         self.edges: List[Edge] = []
         self.vertices: List[Vertex] = []
 
-        self.edgesPositionsMap: Dict[int:int] = {}
-        self.verticesPositionsMap: Dict[int:int] = {}
+        self.edgesPositionsMap: Dict[int, int] = {}
+        self.verticesPositionsMap: Dict[int, int] = {}
 
         self.width, self.height = width, height
         self.displaySize: Tuple[int, ...] = (width, height)
@@ -27,16 +28,18 @@ class GraphManager(metaclass=Singleton):
         self.selectedVertexId = 0
         self.isCrazySpanningMode = True
         self.isSelectingVertexMode = False
-        self.test_intersectionMap: Dict[int:List[bool]] = {}
+        self.test_intersectionMap: Dict[int, List[bool]] = {}
         self.dimentsManger = DimensionsManger()
 
         self.graphGenerator = GraphGenerator(*self.displaySize)
         self.graphGenerator.generate2ComponentsGraph()
-        self.vertices = self.graphGenerator.vertices
-        self.edges = self.graphGenerator.edges
-        self.edgesPositionsMap = self.graphGenerator.edgesPositionsMap
-        self.verticesPositionsMap = self.graphGenerator.verticesPositionsMap
-        self.test_intersectionMap = self.graphGenerator.test_intersectionMap
+
+    def setupFromGraphHolder(self,graphHolder:GraphHolder):
+        self.vertices = graphHolder.vertices
+        self.edges = graphHolder.edges
+        self.edgesPositionsMap = graphHolder.edgesPositionsMap
+        self.verticesPositionsMap = graphHolder.verticesPositionsMap
+        self.test_intersectionMap = graphHolder.test_intersectionMap
 
     def setupEdges(self):
         for edge in self.edges:

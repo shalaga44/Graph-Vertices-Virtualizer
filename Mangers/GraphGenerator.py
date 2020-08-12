@@ -1,6 +1,7 @@
 from typing import Tuple, List, Dict
 
-from DataTypes import Pos
+from DataTypes.Pos import Pos
+from DataTypes.GraphHolder import GraphHolder
 from views import Vertex, Edge
 
 
@@ -9,13 +10,14 @@ class GraphGenerator:
         self.width, self.height = width, height
         self.displaySize: Tuple[int, ...] = (width, height)
         self.vertices: List[Vertex] = []
-        self.verticesPositionsMap: Dict[int:int] = {}
+        self.verticesPositionsMap: Dict[int, int] = {}
         self.edges: List[Edge] = []
         self.vertices: List[Vertex] = []
-        self.verticesPositionsMap: Dict[int:int] = {}
-        self.edgesPositionsMap: Dict[int:int] = {}
+        self.verticesPositionsMap: Dict[int, int] = {}
+        self.edgesPositionsMap: Dict[int, int] = {}
+        self.test_intersectionMap: Dict[int, List[bool]] = {}
 
-    def generate2ComponentsGraph(self):
+    def generate2ComponentsGraph(self) -> GraphHolder:
         self.vertices = [Vertex(44, Pos(*map(lambda x: x // 2, self.displaySize))),
                          Vertex(0, Pos(*map(lambda x: x // 2, self.displaySize))),
                          Vertex(-1, Pos(*map(lambda x: x // 2, self.displaySize))),
@@ -31,20 +33,27 @@ class GraphGenerator:
         self._updateVerticesPositionsMap()
         self._updateEdgesPositionsMap()
 
-    def generateVerticesCanFitIn(self, width, height, dimentsManger):
+        graphHolder = GraphHolder(self.edges, self.vertices, self.edgesPositionsMap, self.verticesPositionsMap,
+                                  self.test_intersectionMap)
+        return graphHolder
+
+    def generateVerticesCanFitIn(self, width, height, dimentsManger) -> GraphHolder:
         c, r = ((width // (dimentsManger.VerticesDiments.radius * 2)) // 2) + 1, (
                 (height // (dimentsManger.VerticesDiments.radius * 2)) // 2)
         self.vertices = [Vertex(i, Pos(((i % c) * (width // c)),
                                        ((i // c) * (height // r))))
                          for i in range(c * r)]
         self._updateVerticesPositionsMap()
+        graphHolder = GraphHolder(self.edges, self.vertices, self.edgesPositionsMap, self.verticesPositionsMap,
+                                  self.test_intersectionMap)
+        return graphHolder
 
     def _updateVerticesPositionsMap(self):
-        self.verticesPositionsMap: dict[int:int] = {self.vertices[i].idKey: i for i in range(len(self.vertices))}
+        self.verticesPositionsMap: Dict[int, int] = {self.vertices[i].idKey: i for i in range(len(self.vertices))}
         self.test_intersectionMap = {k: [True] * len(self.vertices) for k in self.verticesPositionsMap.keys()}
         for k in self.test_intersectionMap:
             p = self.verticesPositionsMap[k]
             self.test_intersectionMap[k][p] = False
 
     def _updateEdgesPositionsMap(self):
-        self.edgesPositionsMap: dict[int:int] = {self.edges[i]: i for i in range(len(self.edges))}
+        self.edgesPositionsMap: Dict[int, int] = {self.edges[i]: i for i in range(len(self.edges))}

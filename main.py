@@ -6,7 +6,7 @@ from typing import Final
 import pygame as pg
 
 from Colors import MainColors, EdgesColors
-from DataTypes import Pos
+from DataTypes.Pos import Pos
 from Mangers.GraphGenerator import GraphGenerator
 from Mangers.GraphManager import GraphManager, DimensionsManger
 from views import Vertex
@@ -29,7 +29,9 @@ class Visualizer:
         self.screen = pg.display.set_mode(self.displaySize)
         self.selectedVertex = 0
         self.graphManger: Final = GraphManager(*self.displaySize)
-        # self.graphGenerator = GraphGenerator(*self.displaySize)
+        self.graphGenerator = GraphGenerator(*self.displaySize)
+        graphHolder = self.graphGenerator.generate2ComponentsGraph()
+        self.graphManger.setupFromGraphHolder(graphHolder)
         self.dimentsManger: Final = DimensionsManger(*self.displaySize)
         # self.graphManger.generateVerticesCanFitIn(*self.displaySize)
         # self.graphManger.generate2ComponentsGraph()

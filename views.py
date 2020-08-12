@@ -4,7 +4,7 @@ from pygame.font import get_default_font
 from pygame.surface import Surface
 
 import Colors
-from DataTypes import Pos
+from DataTypes .Pos import Pos
 from Tokens import VerticesTokens
 
 
