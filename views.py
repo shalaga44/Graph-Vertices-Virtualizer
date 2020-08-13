@@ -4,7 +4,7 @@ from pygame.font import get_default_font
 from pygame.surface import Surface
 
 import Colors
-from DataTypes .Pos import Pos
+from DataTypes.Pos import Pos
 from Tokens import VerticesTokens
 
 
@@ -17,8 +17,8 @@ class Vertex:
     lastIntersection = None
     textImage: Surface
 
-    def __init__(self, idKey: int, pos: Pos):
-        self.idKey: int = idKey
+    def __init__(self, vertexName, pos: Pos):
+        self.vertexName: str = str(vertexName)
         self._pos: Pos = pos
         self.generateNewTextImage()
 
@@ -35,11 +35,11 @@ class Vertex:
         from Mangers.GraphManager import DimensionsManger
         diments = DimensionsManger()
         font = SysFont(get_default_font(), diments.VerticesDiments.fontSize)
-        keyImage = font.render(str(self.idKey), True, Colors.VerticesColors.OnVertexDefaultColor)
-        wText, hText = font.size(str(self.idKey))
+        keyImage = font.render(str(self.vertexName), True, Colors.VerticesColors.OnVertexDefaultColor)
+        wText, hText = font.size(str(self.vertexName))
         self.wTextHalf, self.hTextHalf = wText // 2, hText // 2
         self.textImage = keyImage
-        self.isMoved =True
+        self.isMoved = True
 
     @property
     def textPos(self):
@@ -88,7 +88,7 @@ class Vertex:
         return result
 
     def __str__(self):
-        return f"id:{self.idKey}, pos:{self.pos}"
+        return self.vertexName
 
     def __repr__(self):
         return self.__str__()
@@ -115,6 +115,6 @@ class Vertex:
 
 
 class Edge:
-    def __init__(self, fromNodeId, toNodeId):
-        self.start = fromNodeId
-        self.end = toNodeId
+    def __init__(self, fromVertexName, toVertexName):
+        self.start: str = str(fromVertexName)
+        self.end: str = str(toVertexName)

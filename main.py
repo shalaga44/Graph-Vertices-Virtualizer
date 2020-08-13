@@ -30,9 +30,10 @@ class Visualizer:
         self.selectedVertex = 0
         self.graphManger: Final = GraphManager(*self.displaySize)
         self.graphGenerator = GraphGenerator(*self.displaySize)
-        graphHolder = self.graphGenerator.generate2ComponentsGraph()
-        self.graphManger.setupFromGraphHolder(graphHolder)
+        # graphHolder = self.graphGenerator.generate2ComponentsGraph()
         self.dimentsManger: Final = DimensionsManger(*self.displaySize)
+        graphHolder = self.graphGenerator.generateVerticesCanFitIn(*self.displaySizeHalf,self.dimentsManger)
+        self.graphManger.setupFromGraphHolder(graphHolder)
         # self.graphManger.generateVerticesCanFitIn(*self.displaySize)
         # self.graphManger.generate2ComponentsGraph()
 
@@ -65,8 +66,8 @@ class Visualizer:
 
     def _drawEdge(self, edge):
         pg.draw.line(self.screen, EdgesColors.default,
-                     self.graphManger.vertices[self.graphManger.verticesPositionsMap[edge.start]].pos.location(),
-                     self.graphManger.vertices[self.graphManger.verticesPositionsMap[edge.end]].pos.location(),
+                     tuple(self.graphManger.verticesManger.byName(edge.start).pos),
+                     tuple(self.graphManger.verticesManger.byName(edge.end).pos),
                      self.dimentsManger.EdgesDiments.width)
 
     def events(self):
