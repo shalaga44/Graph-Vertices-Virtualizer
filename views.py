@@ -15,7 +15,7 @@ class Vertex:
     _status = VerticesTokens.isDefault
     _isMoved = True
 
-    _lastIntersectionMemorySize = 3
+    _lastIntersectionMemorySize = 4
     _lastIntersectionMemoryIndex = 0
     _lastIntersectionMemory: Final[Set[float]] = {float(emptyCell)
                                                   for emptyCell in range(_lastIntersectionMemorySize)}

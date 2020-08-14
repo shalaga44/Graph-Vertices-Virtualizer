@@ -15,6 +15,7 @@ from views import Vertex
 class Visualizer:
     def __init__(self):
 
+        self.isScalding = True
         self.mainThreadIsRunning = True
         self.mouseThread = Thread(target=self.mouse)
         self.mainThread = Thread(target=self.main)
@@ -57,6 +58,9 @@ class Visualizer:
         while self.mainThreadIsRunning:
             if self.graphManger.isSelectingVertexMode:
                 self.moveSelectedVertexToMouse()
+            if self.isScalding:
+                self.graphManger.scaleVertices()
+                self.isScalding = False
 
     def startVertexSelectingMode(self, mousePos: Pos):
         self.graphManger.startVertexSelectingMode(mousePos)
@@ -94,7 +98,8 @@ class Visualizer:
         self.clock.tick(self.fps)
         pg.display.update()
         self.screen.fill(MainColors.surfaceColor)
-        pg.display.set_caption(f"scale:{self.dimentsManger.scaleFactor},\t\t"
+        scaleTag = f"scale:{self.dimentsManger.scaleFactor}" if not self.isScalding else "scaling ..."
+        pg.display.set_caption(f"{scaleTag},\t\t"
                                f"Selection:{self.graphManger.isSelectingVertexMode},\t\t"
                                f"Crazy Spanning:{self.graphManger.isCrazySpanningMode} ")
 
@@ -133,15 +138,13 @@ class Visualizer:
         self.graphManger.toggleCrazySpanning()
 
     def scaleFactorUp(self):
-        self.dimentsManger.scaleFactor += .5
-        for v in self.graphManger.vertices:
-            v.generateNewTextImage()
+        self.dimentsManger.scaleFactor += .1
+        self.isScalding = True
 
     def scaleFactorDown(self):
         if self.dimentsManger.scaleFactor > .1:
             self.dimentsManger.scaleFactor -= .1
-            for v in self.graphManger.vertices:
-                v.generateNewTextImage()
+            self.isScalding = True
 
 
 if __name__ == '__main__':

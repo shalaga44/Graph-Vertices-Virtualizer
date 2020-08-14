@@ -165,7 +165,9 @@ class GraphManager(metaclass=Singleton):
         return self.verticesManger.isVertexNotIntersected(v)
 
     def toggleCrazySpanning(self):
-        if self.isCrazySpanningMode:
-            self.isCrazySpanningMode = False
-        else:
-            self.isCrazySpanningMode = True
+        self.isCrazySpanningMode = True if not self.isCrazySpanningMode \
+            else False
+
+    def scaleVertices(self):
+        self.verticesManger.scaleVertices()
+        self.toggleCrazySpanning()

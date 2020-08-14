@@ -74,3 +74,7 @@ class VerticesManger(metaclass=Singleton):
         # vertex can't intersect with herself
         for key in self.verticesPositionsMap:
             self.markAsNotIntersected(self.byName(key), self.byName(key))
+
+    def scaleVertices(self):
+        for vertex in self:
+            vertex.generateNewTextImage()
