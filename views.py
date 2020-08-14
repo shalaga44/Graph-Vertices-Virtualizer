@@ -1,4 +1,6 @@
 from copy import deepcopy
+from typing import Dict, Set, Final
+
 from pygame.font import SysFont
 from pygame.font import get_default_font
 from pygame.surface import Surface
@@ -13,8 +15,15 @@ class Vertex:
     _status = VerticesTokens.isDefault
     _isMoved = True
 
+    _lastIntersectionMemorySize = 3
+    _lastIntersectionMemoryIndex = 0
+    _lastIntersectionMemory: Final[Set[float]] = {float(emptyCell)
+                                                  for emptyCell in range(_lastIntersectionMemorySize)}
+    _lastIntersectionMemoryMap: Final[Dict[int, float]] = {emptyCell: float(emptyCell) for emptyCell in
+                                                           range(_lastIntersectionMemorySize)}
     wTextHalf, hTextHalf = None, None
-    lastIntersection = None
+    _lastIntersection = None
+
     textImage: Surface
 
     def __init__(self, vertexName, pos: Pos):
@@ -30,6 +39,18 @@ class Vertex:
     def pos(self, newPos):
         self.isMoved = True
         self.pos = newPos
+
+    @property
+    def lastIntersection(self):
+        raise NotImplementedError("Use isLastIntersection(intersection: float)")
+
+    @lastIntersection.setter
+    def lastIntersection(self, newIntersection):
+        if self.isLastIntersection(newIntersection): return
+        self.addNewIntersectionToMemory(newIntersection)
+
+    def isLastIntersection(self, intersection: float):
+        return intersection in self._lastIntersectionMemory
 
     def generateNewTextImage(self):
         from Mangers.GraphManager import DimensionsManger
@@ -112,6 +133,23 @@ class Vertex:
         self.pos.x += moveX
         self.pos.y += moveY
         self.isMoved = True
+
+    def _incrementLastIntersectionMemory(self):
+        self._lastIntersectionMemoryIndex = (self._lastIntersectionMemoryIndex + 1) % \
+                                            self._lastIntersectionMemorySize
+
+    def _lastMemoryCellKey(self) -> float:
+        return self._lastIntersectionMemoryMap[self._lastIntersectionMemoryIndex]
+
+    def _replaceIntersectionsInMemory(self, lastMemoryCell: float, newIntersection: float):
+        self._lastIntersectionMemory.remove(lastMemoryCell)
+        self._lastIntersectionMemory.add(newIntersection)
+        self._lastIntersectionMemoryMap[self._lastIntersectionMemoryIndex] = newIntersection
+
+    def addNewIntersectionToMemory(self, newIntersection: float):
+        lastMemoryCell = self._lastMemoryCellKey()
+        self._replaceIntersectionsInMemory(lastMemoryCell, newIntersection)
+        self._incrementLastIntersectionMemory()
 
 
 class Edge:

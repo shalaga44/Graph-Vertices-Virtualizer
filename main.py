@@ -32,7 +32,7 @@ class Visualizer:
         self.graphGenerator = GraphGenerator(*self.displaySize)
         # graphHolder = self.graphGenerator.generate2ComponentsGraph()
         self.dimentsManger: Final = DimensionsManger(*self.displaySize)
-        graphHolder = self.graphGenerator.generateVerticesCanFitIn(*self.displaySizeHalf,self.dimentsManger)
+        graphHolder = self.graphGenerator.generateVerticesCanFitIn(*self.displaySize, self.dimentsManger)
         self.graphManger.setupFromGraphHolder(graphHolder)
         # self.graphManger.generateVerticesCanFitIn(*self.displaySize)
         # self.graphManger.generate2ComponentsGraph()
@@ -130,7 +130,7 @@ class Visualizer:
         self.graphManger.moveSelectedVertexTo(mx, my)
 
     def startCrazySpanningMode(self):
-        self.graphManger.startCrazySpanning()
+        self.graphManger.toggleCrazySpanning()
 
     def scaleFactorUp(self):
         self.dimentsManger.scaleFactor += .5

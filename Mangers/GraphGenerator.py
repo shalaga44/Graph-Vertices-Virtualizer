@@ -34,7 +34,7 @@ class GraphGenerator:
         return graphHolder
 
     def generateVerticesCanFitIn(self, width, height, dimentsManger) -> GraphHolder:
-        c, r = ((width // (dimentsManger.VerticesDiments.radius * 2)) // 2) + 1, (
+        c, r = ((width // (dimentsManger.VerticesDiments.radius * 2)) // 2), (
                 (height // (dimentsManger.VerticesDiments.radius * 2)) // 2)
         self.vertices.extend([Vertex(i, Pos(((i % c) * (width // c)),
                                             ((i // c) * (height // r))))

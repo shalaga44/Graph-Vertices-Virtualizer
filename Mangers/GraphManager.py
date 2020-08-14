@@ -89,6 +89,7 @@ class GraphManager(metaclass=Singleton):
                 intersection = isVerticesIntersecting(vertex, u, self.dimentsManger.VerticesDiments.intersectionRadius)
                 if intersection:
                     self.moveVertexAwayVertex(u, vertex, intersection)
+                    # self.moveVertexAwayVertex(vertex, u, intersection)
                     self.verticesManger.markAsIntersected(u, vertex)
                 else:
                     self.verticesManger.markAsNotIntersected(u, vertex)
@@ -149,9 +150,10 @@ class GraphManager(metaclass=Singleton):
         v.pos.x += diffX * intersection / 10000
         v.pos.y += diffY * intersection / 10000
         v.isMoved = True
+        self._alignVertexOnScreen(v)
 
     def fixVertexSameIntersection(self, v: Vertex, intersection):
-        if intersection == v.lastIntersection:
+        if v.isLastIntersection(intersection):
             diffX, diffY = random.choice(
                 list(itertools.permutations(
                     [-self.dimentsManger.EdgesDiments.length, 0, self.dimentsManger.EdgesDiments.length], 2)))
@@ -162,7 +164,7 @@ class GraphManager(metaclass=Singleton):
     def isVertexNotIntersected(self, v: Vertex):
         return self.verticesManger.isVertexNotIntersected(v)
 
-    def startCrazySpanning(self):
+    def toggleCrazySpanning(self):
         if self.isCrazySpanningMode:
             self.isCrazySpanningMode = False
         else:
