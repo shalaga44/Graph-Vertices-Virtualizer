@@ -22,7 +22,7 @@ class VerticesManger(metaclass=Singleton):
 
     def isSelectedVertex(self, v: Vertex) -> bool:
         if self.selectedVertexName is None: return False
-        return v.vertexName == self.byName(self.selectedVertexName)
+        return v.vertexName == self.selectedVertexName
 
     def updateSelectedVertex(self, selectedVertex: Vertex):
         self.selectedVertexName = selectedVertex.vertexName
