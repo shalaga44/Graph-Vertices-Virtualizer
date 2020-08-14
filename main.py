@@ -15,13 +15,13 @@ from views import Vertex
 class Visualizer:
     def __init__(self):
 
-        self.isScalding = True
+        self.isScalding = False
         self.mainThreadIsRunning = True
         self.mouseThread = Thread(target=self.mouse)
         self.mainThread = Thread(target=self.main)
         pg.init()
         # self.width, self.height = 562, 1000
-        self.width, self.height = 720, 720
+        self.width, self.height = 2000, 2000
         self.displaySize = (self.width, self.height)
         self.displaySizeHalf = (self.width // 2, self.height // 2)
         self.clock = pg.time.Clock()
@@ -49,11 +49,6 @@ class Visualizer:
 
             self.updateDisplay()
 
-    def drawVertices(self):
-        for vertex in self.graphManger.vertices:
-            self._drawVertex(vertex)
-            # vertex.isMoved = False
-
     def mouse(self):
         while self.mainThreadIsRunning:
             if self.graphManger.isSelectingVertexMode:
@@ -61,18 +56,6 @@ class Visualizer:
             if self.isScalding:
                 self.graphManger.scaleVertices()
                 self.isScalding = False
-
-    def startVertexSelectingMode(self, mousePos: Pos):
-        self.graphManger.startVertexSelectingMode(mousePos)
-
-    def stopVertexSelectingMode(self):
-        self.graphManger.stopVertexSelectingMode()
-
-    def _drawEdge(self, edge):
-        pg.draw.line(self.screen, EdgesColors.default,
-                     tuple(self.graphManger.verticesManger.byName(edge.start).pos),
-                     tuple(self.graphManger.verticesManger.byName(edge.end).pos),
-                     self.dimentsManger.EdgesDiments.width)
 
     def events(self):
         for event in pg.event.get():
@@ -103,32 +86,19 @@ class Visualizer:
                                f"Selection:{self.graphManger.isSelectingVertexMode},\t\t"
                                f"Crazy Spanning:{self.graphManger.isCrazySpanningMode} ")
 
+    def startVertexSelectingMode(self, mousePos: Pos):
+        self.graphManger.startVertexSelectingMode(mousePos)
+
+    def stopVertexSelectingMode(self):
+        self.graphManger.stopVertexSelectingMode()
+
     def startMainThread(self):
         self.mainThread.daemon = False
         self.mainThread.start()
 
-    def _drawVertex(self, vertex: Vertex):
-        CopiedVertex = deepcopy(vertex)
-        self._drawVertexCircle(CopiedVertex)
-        self._drawVertexText(CopiedVertex)
-
-    def _drawVertexText(self, vertex: Vertex):
-        self.screen.blit(vertex.textImage, vertex.textPos)
-
-    def _drawVertexCircle(self, vertex: Vertex):
-        pg.draw.circle(self.screen, vertex.color, vertex.pos.location(), self.dimentsManger.VerticesDiments.radius)
-
-    def drawEdges(self):
-        for edge in self.graphManger.edges:
-            self._drawEdge(edge)
-
     def startMouseThread(self):
         self.mouseThread.daemon = False
         self.mouseThread.start()
-
-    def halt(self):
-        self.mainThreadIsRunning = False
-        sys.exit(0)
 
     def moveSelectedVertexToMouse(self):
         mx, my = pg.mouse.get_pos()
@@ -145,6 +115,36 @@ class Visualizer:
         if self.dimentsManger.scaleFactor > .1:
             self.dimentsManger.scaleFactor -= .1
             self.isScalding = True
+
+    def drawEdges(self):
+        for edge in self.graphManger.edges:
+            self._drawEdge(edge)
+
+    def drawVertices(self):
+        for vertex in self.graphManger.vertices:
+            self._drawVertex(vertex)
+            # vertex.isMoved = False
+
+    def _drawEdge(self, edge):
+        pg.draw.line(self.screen, EdgesColors.default,
+                     tuple(self.graphManger.verticesManger.byName(edge.start).pos),
+                     tuple(self.graphManger.verticesManger.byName(edge.end).pos),
+                     self.dimentsManger.EdgesDiments.width)
+
+    def _drawVertex(self, vertex: Vertex):
+        CopiedVertex = deepcopy(vertex)
+        self._drawVertexCircle(CopiedVertex)
+        self._drawVertexText(CopiedVertex)
+
+    def _drawVertexText(self, vertex: Vertex):
+        self.screen.blit(vertex.textImage, vertex.textPos)
+
+    def _drawVertexCircle(self, vertex: Vertex):
+        pg.draw.circle(self.screen, vertex.color, vertex.pos.location(), self.dimentsManger.VerticesDiments.radius)
+
+    def halt(self):
+        self.mainThreadIsRunning = False
+        sys.exit(0)
 
 
 if __name__ == '__main__':
