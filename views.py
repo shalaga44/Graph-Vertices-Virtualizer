@@ -1,5 +1,7 @@
+import itertools
+import random
 from copy import deepcopy
-from typing import Dict, Set, Final
+from typing import Dict, Set, Final, NoReturn
 
 from pygame.font import SysFont
 from pygame.font import get_default_font
@@ -15,7 +17,7 @@ class Vertex:
     _status = VerticesTokens.isDefault
     _isMoved = True
 
-    _lastIntersectionMemorySize = 4
+    _lastIntersectionMemorySize = 6
     _lastIntersectionMemoryIndex = 0
     _lastIntersectionMemory: Final[Set[float]] = {float(emptyCell)
                                                   for emptyCell in range(_lastIntersectionMemorySize)}
@@ -31,13 +33,38 @@ class Vertex:
         self._pos: Pos = pos
         self.generateNewTextImage()
 
+    def moveCloserTo(self, pos: Pos, distance):
+        diffX = pos.x - self.pos.x
+        diffY = pos.y - self.pos.y
+        moveX = diffX * .1
+        moveY = diffY * .1
+        self.pos.x += moveX
+        self.pos.y += moveY
+        self.isMoved = True
+
+        # TODO : REMOVE
+        self.lastIntersection = distance
+
+    def moveAwayFrom(self, pos: Pos, distance):
+
+        if distance == -1.0:
+            self.fixOverlapping()
+        diffX = pos.x - self.pos.x
+        diffY = pos.y - self.pos.y
+        # print(f"{diffX=} {diffY=} {distance=}")
+        self.pos.x += diffX * distance
+        self.pos.y += diffY * distance
+        self.isMoved = True
+        # TODO : REMOVE
+        self.lastIntersection = distance
+
     @property
     def pos(self):
         return self._pos
 
     @pos.setter
     def pos(self, newPos):
-        self.isMoved = True
+        # self.isMoved = True
         self.pos = newPos
 
     @property
@@ -81,7 +108,9 @@ class Vertex:
 
     @property
     def status(self):
-        if self.isMoved:
+        if self._status == VerticesTokens.isSelected:
+            return VerticesTokens.isSelected
+        elif self.isMoved:
             return VerticesTokens.isMoving
         else:
             return self._status
@@ -116,23 +145,14 @@ class Vertex:
 
     def updateColor(self):
         color = Colors.MainColors.onSurfaceColor
-        if self.status == VerticesTokens.isDefault:
+        status = self.status
+        if status == VerticesTokens.isDefault:
             color = Colors.VerticesColors.vertexDefaultColor
-        elif self.status == VerticesTokens.isSelected:
+        elif status == VerticesTokens.isSelected:
             color = Colors.VerticesColors.vertexSelectedColor
-        elif self.status == VerticesTokens.isMoving:
+        elif status == VerticesTokens.isMoving:
             color = Colors.VerticesColors.isMoving
         self._color = color
-
-    def moveCloserTo(self, v, distance):
-
-        diffX = v.pos.x - self.pos.x
-        diffY = v.pos.y - self.pos.y
-        moveX = diffX * distance / 100000
-        moveY = diffY * distance / 100000
-        self.pos.x += moveX
-        self.pos.y += moveY
-        self.isMoved = True
 
     def _incrementLastIntersectionMemory(self):
         self._lastIntersectionMemoryIndex = (self._lastIntersectionMemoryIndex + 1) % \
@@ -150,6 +170,18 @@ class Vertex:
         lastMemoryCell = self._lastMemoryCellKey()
         self._replaceIntersectionsInMemory(lastMemoryCell, newIntersection)
         self._incrementLastIntersectionMemory()
+
+    def doCrazySpan(self, intersection: float, amount: int):
+        if self.isLastIntersection(intersection):
+            diffX, diffY = random.choice(
+                list(itertools.permutations(
+                    [-amount, 0, amount], 2)))
+            self.pos.x += diffX
+            self.pos.y += diffY
+        self.lastIntersection = intersection
+
+    def fixOverlapping(self):
+        self.doCrazySpan(-1.0, 1)
 
 
 class Edge:

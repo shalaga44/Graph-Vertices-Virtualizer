@@ -1,9 +1,6 @@
-import itertools
-import random
 from typing import List, Tuple, Dict, Optional
 
 from DataTypes.Pos import Pos
-# from Dimensions import VerticesDiments, EdgesDiments, MainDiments
 from DataTypes.GraphHolder import GraphHolder
 from LinearMath import getVerticesIntersection, isVerticesIntersecting, isPointInCircle
 from Mangers.DimensionsManger import DimensionsManger
@@ -13,8 +10,9 @@ from SingletonMetaClass import Singleton
 from views import Vertex, Edge
 
 
-class GraphManager(metaclass=Singleton):
+class GraphManager():
     def __init__(self, width, height):
+
         self.edges: List[Edge] = []
         self.verticesManger: VerticesManger = VerticesManger()
         self.edgesPositionsMap: Dict[int, int] = {}
@@ -24,12 +22,27 @@ class GraphManager(metaclass=Singleton):
         self.displaySize: Tuple[int, ...] = (width, height)
         self.displaySizeHalf: Tuple[int, ...] = (width // 2, height // 2)
 
-        self.isCrazySpanningMode = True
+        self.isVerticesSetupModeDisabled = False
+        self.isEdgesSetupModeDisabled = False
+        self._isCrazySpanningModeDisabled = False
+
+        self._isCrazySpanningMode = True
         self.isSelectingVertexMode = False
+        self.noVerticesIntersecting = False
+
         self.dimentsManger = DimensionsManger()
 
         self.graphGenerator = GraphGenerator(*self.displaySize)
         self.graphGenerator.generate2ComponentsGraph()
+
+    @property
+    def isCrazySpanningMode(self) -> Optional[bool]:
+        return None if self._isCrazySpanningModeDisabled \
+            else self._isCrazySpanningMode
+
+    @isCrazySpanningMode.setter
+    def isCrazySpanningMode(self, b: bool):
+        self._isCrazySpanningMode = b
 
     @property
     def vertices(self):
@@ -40,26 +53,51 @@ class GraphManager(metaclass=Singleton):
         self.edges = graphHolder.edges
         self.edgesPositionsMap = graphHolder.edgesPositionsMap
 
+    def setupVertices(self):
+        if self.isVerticesSetupModeDisabled: return
+        allStopped = True
+        for vertex in self.verticesManger:
+            if vertex.isMoved:
+                self._moveVerticesAwayFrom(vertex)
+                self._alignVertexOnScreen(vertex)
+            if self.isVertexNotIntersected(vertex):
+                vertex.isMoved = False
+            else:
+                allStopped = False
+        if allStopped:
+            self.noVerticesIntersecting = True
+            self.isCrazySpanningMode = False
+
     def setupEdges(self):
+        if self.isEdgesSetupModeDisabled: return
+        allStopped = True
         for edge in self.edges:
             self._limitVerticesOfEdge(edge)
+            if not self.isVertexNotIntersected(self.verticesManger.byName(edge.start)):
+                if not self.isVertexNotIntersected(self.verticesManger.byName(edge.end)):
+                    allStopped = False
+        if allStopped:
+            self.noVerticesIntersecting = True
+            self.isCrazySpanningMode = False
 
     def _limitVerticesOfEdge(self, edge: Edge):
+        if self.isEdgesSetupModeDisabled: return
         start: Vertex = self.verticesManger.byName(edge.start)
         end: Vertex = self.verticesManger.byName(edge.end)
         intersection = getVerticesIntersection(start, end, self.dimentsManger.EdgesDiments.length)
         if intersection > 0:
-            end.moveCloserTo(start, intersection)
-            start.moveCloserTo(end, intersection)
-            self._alignVertexOnScreen(end)
-            self._alignVertexOnScreen(start)
+            if self.isSelectedVertex(start):
+                # end.moveCloserTo(start.pos, intersection)
+                # end.moveCloserTo(start.pos, self.normalizedDistanceOf(intersection))
+                # end.moveCloserTo(start.pos, .1)
+                end.moveCloserTo(start.pos, intersection)
+                self._alignVertexOnScreen(end)
+            else:
+                start.moveCloserTo(end.pos, intersection)
+                self._alignVertexOnScreen(start)
             self.verticesManger.markAsIntersected(start, end)
-
         else:
-            # pass
             self.verticesManger.markAsNotIntersected(start, end)
-            # start.isMoved = False
-            # end.isMoved = False
 
     def _alignVertexOnScreen(self, vertex):
         r = self.dimentsManger.VerticesDiments.radius
@@ -68,34 +106,21 @@ class GraphManager(metaclass=Singleton):
         if vertex.pos.y - r < 0: vertex.pos.y = 0 + r
         if vertex.pos.y + r > self.height: vertex.pos.y = self.height - r
 
-    def setupVertices(self):
-        allStopped = True
-        for vertex in self.verticesManger:
-            if vertex.isMoved:
-                self._separateFromOtherVertices(vertex)
-                self._alignVertexOnScreen(vertex)
-            if self.isVertexNotIntersected(vertex):
-                vertex.isMoved = False
-            else:
-                allStopped = False
-        if allStopped:
-            self.isCrazySpanningMode = False
-
-    def _separateFromOtherVertices(self, vertex):
-        # isIntersected = False
-        for u in self.verticesManger:
-            if vertex == u: continue
-            if not self.isSelectedVertex(u):
-                intersection = isVerticesIntersecting(vertex, u, self.dimentsManger.VerticesDiments.intersectionRadius)
+    def _moveVerticesAwayFrom(self, fixedVertex: Vertex):
+        if self.isVerticesSetupModeDisabled: return
+        radius = self.dimentsManger.VerticesDiments.intersectionRadius
+        for v in self.verticesManger:
+            if fixedVertex == v: continue
+            if not self.isSelectedVertex(v):
+                intersection = isVerticesIntersecting(fixedVertex, v, radius)
                 if intersection:
-                    self.moveVertexAwayVertex(u, vertex, intersection)
-                    # self.moveVertexAwayVertex(vertex, u, intersection)
-                    self.verticesManger.markAsIntersected(u, vertex)
+                    self.doCrazySpanningIfPossible(v, intersection)
+                    v.moveAwayFrom(fixedVertex.pos, self.normalizedDistanceOf(intersection))
+                    self._alignVertexOnScreen(v)
+                    self.verticesManger.markAsIntersected(v, fixedVertex)
+
                 else:
-                    self.verticesManger.markAsNotIntersected(u, vertex)
-                    # isIntersected = True
-        # if not isIntersected:
-        # vertex.isMoved = False
+                    self.verticesManger.markAsNotIntersected(v, fixedVertex)
 
     def isSelectedVertex(self, v: Vertex) -> bool:
         if self.isSelectingVertexMode:
@@ -103,18 +128,13 @@ class GraphManager(metaclass=Singleton):
         return False
 
     def moveSelectedVertexTo(self, x: int, y: int):
-        selectedVertex = self.verticesManger.selectedVertex
+        try:
+            selectedVertex = self.verticesManger.selectedVertex
+        except KeyError:
+            return
         selectedVertex.pos.x = x
         selectedVertex.pos.y = y
-        for u in self.verticesManger:
-            if selectedVertex == u: continue
-            intersection = isVerticesIntersecting(selectedVertex, u,
-                                                  self.dimentsManger.VerticesDiments.intersectionRadius)
-            if intersection:
-                self.moveVertexAwayVertex(u, selectedVertex, intersection)
-                self.verticesManger.markAsIntersected(u, selectedVertex)
-            else:
-                self.verticesManger.markAsNotIntersected(u, selectedVertex)
+        self._moveVerticesAwayFrom(selectedVertex)
 
     def updateSelectedVertex(self, vertex: Vertex):
         self.verticesManger.updateSelectedVertex(vertex)
@@ -141,26 +161,6 @@ class GraphManager(metaclass=Singleton):
         self.verticesManger.clearSelectedVertex()
         self.isSelectingVertexMode = False
 
-    def moveVertexAwayVertex(self, v: Vertex, u: Vertex, intersection):
-        if self.isCrazySpanningMode:
-            self.fixVertexSameIntersection(v, intersection)
-
-        diffX = u.pos.x - v.pos.x
-        diffY = u.pos.y - v.pos.y
-        v.pos.x += diffX * intersection / 10000
-        v.pos.y += diffY * intersection / 10000
-        v.isMoved = True
-        self._alignVertexOnScreen(v)
-
-    def fixVertexSameIntersection(self, v: Vertex, intersection):
-        if v.isLastIntersection(intersection):
-            diffX, diffY = random.choice(
-                list(itertools.permutations(
-                    [-self.dimentsManger.EdgesDiments.length, 0, self.dimentsManger.EdgesDiments.length], 2)))
-            v.pos.x += diffX
-            v.pos.y += diffY
-        v.lastIntersection = intersection
-
     def isVertexNotIntersected(self, v: Vertex):
         return self.verticesManger.isVertexNotIntersected(v)
 
@@ -168,6 +168,26 @@ class GraphManager(metaclass=Singleton):
         self.isCrazySpanningMode = True if not self.isCrazySpanningMode \
             else False
 
+    def startCrazySpanning(self):
+        self.isCrazySpanningMode = True
+
     def scaleVertices(self):
         self.verticesManger.scaleVertices()
-        self.toggleCrazySpanning()
+        self.startCrazySpanning()
+
+    def doCrazySpanningIfPossible(self, v: Vertex, intersection: float):
+        if self.isCrazySpanningMode:
+            v.doCrazySpan(intersection, self.dimentsManger.EdgesDiments.length)
+
+    def toggleVerticesSetupMode(self):
+        self.isVerticesSetupModeDisabled = False if self.isVerticesSetupModeDisabled \
+            else True
+
+    def toggleEdgesSetupMode(self):
+        self.isEdgesSetupModeDisabled = False if self.isEdgesSetupModeDisabled \
+            else True
+
+    def normalizedDistanceOf(self, intersection) -> float:
+        return round(intersection /
+                     ((self.dimentsManger.scaleFactor * self.dimentsManger.scaleFactor) * 10000),
+                     2)

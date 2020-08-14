@@ -44,6 +44,8 @@ class VerticesManger(metaclass=Singleton):
 
     def markAsIntersected(self, v: Vertex, u: Vertex):
         self._markIntersection(v, u, True)
+        v.isMoved = True
+        u.isMoved = True
 
     def markAsNotIntersected(self, v: Vertex, u: Vertex):
         self._markIntersection(v, u, False)

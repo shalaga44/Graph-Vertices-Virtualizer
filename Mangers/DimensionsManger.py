@@ -14,7 +14,7 @@ class DimensionsManger(metaclass=Singleton):
 
     @scaleFactor.setter
     def scaleFactor(self, a):
-        self._scaleFactor = a
+        self._scaleFactor = round(a, 2)
         self.updateScales()
 
     class VerticesDiments:
