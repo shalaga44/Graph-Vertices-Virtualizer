@@ -2,12 +2,13 @@ from typing import List, Tuple, Dict, Optional
 
 from DataTypes.Pos import Pos
 from DataTypes.GraphHolder import GraphHolder
-from LinearMath import getVerticesIntersection, isVerticesIntersecting, isPointInCircle
+from LinearMath import getVerticesIntersection, isVerticesIntersecting, isPointInCircle, getDistanceBetween2Vertices
 from Mangers.DimensionsManger import DimensionsManger
 from Mangers.GraphGenerator import GraphGenerator
 from Mangers.VerticesManager import VerticesManger
 from SingletonMetaClass import Singleton
-from views import Vertex, Edge
+from Views.VertexClass import Vertex
+from Views.EdgeClass import Edge
 
 
 class GraphManager():
@@ -57,7 +58,7 @@ class GraphManager():
         if self.isVerticesSetupModeDisabled: return
         allStopped = True
         for vertex in self.verticesManger:
-            if vertex.isMoved:
+            if vertex.isMoved or 1:
                 self._moveVerticesAwayFrom(vertex)
                 self._alignVertexOnScreen(vertex)
             if self.isVertexNotIntersected(vertex):
@@ -84,17 +85,24 @@ class GraphManager():
         if self.isEdgesSetupModeDisabled: return
         start: Vertex = self.verticesManger.byName(edge.start)
         end: Vertex = self.verticesManger.byName(edge.end)
-        intersection = getVerticesIntersection(start, end, self.dimentsManger.EdgesDiments.length)
-        if intersection > 0:
-            if self.isSelectedVertex(start):
-                # end.moveCloserTo(start.pos, intersection)
-                # end.moveCloserTo(start.pos, self.normalizedDistanceOf(intersection))
-                # end.moveCloserTo(start.pos, .1)
-                end.moveCloserTo(start.pos, intersection)
-                self._alignVertexOnScreen(end)
+        distance = round(getDistanceBetween2Vertices(start, end), 2)
+        if distance > self.dimentsManger.EdgesDiments.length:
+            amountOfMovement = round((distance / self.dimentsManger.EdgesDiments.length) / 10, 1)
+
+            if self.isSelectingVertexMode:
+                if self.isSelectedVertex(start):
+                    end.moveCloserTo(start.pos, amountOfMovement)
+                    self._alignVertexOnScreen(end)
+                else:
+                    start.moveCloserTo(end.pos, amountOfMovement)
+                    self._alignVertexOnScreen(start)
+
             else:
-                start.moveCloserTo(end.pos, intersection)
+                end.moveCloserTo(start.pos, amountOfMovement)
+                start.moveCloserTo(end.pos, amountOfMovement)
                 self._alignVertexOnScreen(start)
+                self._alignVertexOnScreen(end)
+
             self.verticesManger.markAsIntersected(start, end)
         else:
             self.verticesManger.markAsNotIntersected(start, end)
@@ -109,18 +117,18 @@ class GraphManager():
     def _moveVerticesAwayFrom(self, fixedVertex: Vertex):
         if self.isVerticesSetupModeDisabled: return
         radius = self.dimentsManger.VerticesDiments.intersectionRadius
-        for v in self.verticesManger:
-            if fixedVertex == v: continue
-            if not self.isSelectedVertex(v):
-                intersection = isVerticesIntersecting(fixedVertex, v, radius)
+        for vertex in self.verticesManger:
+            if fixedVertex == vertex: continue
+            if not self.isSelectedVertex(vertex):
+                intersection = isVerticesIntersecting(fixedVertex, vertex, radius)
                 if intersection:
-                    self.doCrazySpanningIfPossible(v, intersection)
-                    v.moveAwayFrom(fixedVertex.pos, self.normalizedDistanceOf(intersection))
-                    self._alignVertexOnScreen(v)
-                    self.verticesManger.markAsIntersected(v, fixedVertex)
+                    self.doCrazySpanningIfPossible(vertex, intersection)
+                    vertex.moveAwayFrom(fixedVertex.pos, self.normalizedDistanceOf(intersection))
+                    self._alignVertexOnScreen(vertex)
+                    self.verticesManger.markAsIntersected(vertex, fixedVertex)
 
                 else:
-                    self.verticesManger.markAsNotIntersected(v, fixedVertex)
+                    self.verticesManger.markAsNotIntersected(vertex, fixedVertex)
 
     def isSelectedVertex(self, v: Vertex) -> bool:
         if self.isSelectingVertexMode:

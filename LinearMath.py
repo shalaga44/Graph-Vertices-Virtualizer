@@ -1,7 +1,8 @@
 from math import sqrt
 
 from DataTypes.Pos import Pos
-from views import Vertex
+from Views.EdgeClass import Edge
+from Views.VertexClass import Vertex
 from typing import Union
 
 
@@ -36,10 +37,14 @@ def getDistanceBetween2Points(x1: int, y1: int, x2: int, y2: int) -> float:
 
 
 def getDistanceBetween2Pos(pos1: Pos, pos2: Pos) -> float:
-    distance = getDistanceBetween2Points(pos1.x, pos2.x, pos1.y, pos2.y)
+    # distance = getDistanceBetween2Points(pos1.x, pos2.x, pos1.y, pos2.y)
+    # Not the same @_@ . I Don't Know why
+    distance = sqrt(pow((pos1.x - pos2.x), 2) + pow((pos1.y - pos2.y), 2))
     return distance
 
 
 def getDistanceBetween2Vertices(vertex1: Vertex, vertex2: Vertex) -> float:
-    distance = getDistanceBetween2Pos(vertex1.pos, vertex2.pos)
+    # distance = getDistanceBetween2Pos(vertex1.pos, vertex2.pos)
+    # Not the same @_@ . I Don't Know why
+    distance = sqrt(pow((vertex1.pos.x - vertex2.pos.x), 2) + pow((vertex1.pos.y - vertex2.pos.y), 2))
     return distance

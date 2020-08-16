@@ -9,7 +9,7 @@ from Colors import MainColors, EdgesColors
 from DataTypes.Pos import Pos
 from Mangers.GraphGenerator import GraphGenerator
 from Mangers.GraphManager import GraphManager, DimensionsManger
-from views import Vertex
+from Views.VertexClass import Vertex
 
 
 class Visualizer:
@@ -30,7 +30,7 @@ class Visualizer:
         self.screen = pg.display.set_mode(self.displaySize)
         self.selectedVertex = 0
         self.graphManger: Final = GraphManager(*self.displaySize)
-        self.dimentsManger: Final = DimensionsManger(scale,*self.displaySize)
+        self.dimentsManger: Final = DimensionsManger(scale, *self.displaySize)
         self.dimentsManger.scaleFactor = scale
 
     def main(self):

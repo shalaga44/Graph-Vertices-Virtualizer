@@ -36,8 +36,8 @@ class Vertex:
     def moveCloserTo(self, pos: Pos, distance):
         diffX = pos.x - self.pos.x
         diffY = pos.y - self.pos.y
-        moveX = diffX * .1
-        moveY = diffY * .1
+        moveX = diffX * distance
+        moveY = diffY * distance
         self.pos.x += moveX
         self.pos.y += moveY
         self.isMoved = True
@@ -110,7 +110,7 @@ class Vertex:
     def status(self):
         if self._status == VerticesTokens.isSelected:
             return VerticesTokens.isSelected
-        elif self.isMoved:
+        elif self.isMoved or 1:
             return VerticesTokens.isMoving
         else:
             return self._status
@@ -184,7 +184,3 @@ class Vertex:
         self.doCrazySpan(-1.0, 1)
 
 
-class Edge:
-    def __init__(self, fromVertexName, toVertexName):
-        self.start: str = str(fromVertexName)
-        self.end: str = str(toVertexName)

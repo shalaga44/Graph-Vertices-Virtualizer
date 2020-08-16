@@ -2,7 +2,8 @@ from typing import Tuple, List, Dict, Final
 
 from DataTypes.Pos import Pos
 from DataTypes.GraphHolder import GraphHolder
-from views import Vertex, Edge
+from Views.VertexClass import Vertex
+from Views.EdgeClass import Edge
 
 
 class GraphGenerator:

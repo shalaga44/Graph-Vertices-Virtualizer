@@ -31,4 +31,4 @@ class DimensionsManger(metaclass=Singleton):
         self.VerticesDiments.fontSize = int(30 * self.scaleFactor)
         self.VerticesDiments.intersectionRadius = self.VerticesDiments.radius * 2
         self.EdgesDiments.width = int(5 * self.scaleFactor)
-        self.EdgesDiments.length = self.VerticesDiments.radius * 3
+        self.EdgesDiments.length = self.VerticesDiments.intersectionRadius * 3

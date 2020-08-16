@@ -3,7 +3,7 @@ from typing import Dict, List, Iterator, Final
 from DataTypes.GraphHolder import GraphHolder
 from SingletonMetaClass import Singleton
 from Tokens import VerticesTokens
-from views import Vertex
+from Views.VertexClass import Vertex
 
 
 class VerticesManger(metaclass=Singleton):

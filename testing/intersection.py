@@ -6,15 +6,15 @@ import Colors
 from DataTypes.Pos import Pos
 from Mangers.GraphGenerator import GraphGenerator
 from main import Visualizer
-from views import Vertex, Edge
+from Views .VertexClass import Vertex, EdgeClass
 
 w, h = 1000, 1000
 v = Visualizer(displaySize=(w, h), scale=3)
 graphGenerator = GraphGenerator(w, h)
-graphGenerator.vertices.extend([Vertex(44, Pos(w // 2, (h // 2)))])
-graphGenerator.vertices.extend([Vertex(33, Pos(w // 2, (h // 2)))])
-graphGenerator.vertices.extend([Vertex(22, Pos(w // 2, (h // 2)))])
-graphGenerator.edges.extend([Edge(22, 33)])
+graphGenerator.vertices.extend([VertexClass(44, Pos(w // 2, (h // 2)))])
+graphGenerator.vertices.extend([VertexClass(33, Pos(w // 2, (h // 2)))])
+graphGenerator.vertices.extend([VertexClass(22, Pos(w // 2, (h // 2)))])
+graphGenerator.edges.extend([EdgeClass(22, 33)])
 # graphHolder = graphGenerator.generateTriangle()
 graphHolder = graphGenerator.generateTriangle()
 
