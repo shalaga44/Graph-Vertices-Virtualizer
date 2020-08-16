@@ -1,5 +1,6 @@
 from math import sqrt
 
+from DataTypes.Pos import Pos
 from views import Vertex
 from typing import Union
 
@@ -27,3 +28,18 @@ def getCirclesIntersection(x1: int, y1: int, x2: int, y2: int, r1: int, r2: int)
     radSumSq = (r1 + r2) * (r1 + r2)
     intersection = distSq - radSumSq
     return intersection
+
+
+def getDistanceBetween2Points(x1: int, y1: int, x2: int, y2: int) -> float:
+    distance = sqrt(pow((x1 - x2), 2) + pow((y1 - y2), 2))
+    return distance
+
+
+def getDistanceBetween2Pos(pos1: Pos, pos2: Pos) -> float:
+    distance = getDistanceBetween2Points(pos1.x, pos2.x, pos1.y, pos2.y)
+    return distance
+
+
+def getDistanceBetween2Vertices(vertex1: Vertex, vertex2: Vertex) -> float:
+    distance = getDistanceBetween2Pos(vertex1.pos, vertex2.pos)
+    return distance
