@@ -13,7 +13,7 @@ class VerticesManger(metaclass=Singleton):
         self.verticesPositionsMap: Final[Dict[str, int]] = {}
         self.intersectionMap: Final[Dict[int, List[bool]]] = {}
 
-    def takeFromGraphHolder(self, graphHolder: GraphHolder):
+    def importFromGraphHolder(self, graphHolder: GraphHolder):
         self.vertices.extend(graphHolder.vertices)
         self._updateVerticesPositionsMap()
 
