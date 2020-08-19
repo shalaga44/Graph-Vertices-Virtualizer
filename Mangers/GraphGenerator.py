@@ -11,9 +11,7 @@ class GraphGenerator:
         self.width, self.height = width, height
         self.displaySize: Tuple[int, ...] = (width, height)
         self.vertices: Final[List[Vertex]] = []
-        self.verticesPositionsMap: Final[Dict[str, int]] = {}
         self.edges: Final[List[Edge]] = []
-        self.edgesPositionsMap: Final[Dict[int, int]] = {}
 
     def clearAll(self):
         self.clearEdges()
@@ -31,9 +29,7 @@ class GraphGenerator:
         return self.exportGraphHolder()
 
     def exportGraphHolder(self) -> GraphHolder:
-        self._updateVerticesPositionsMap()
-        self._updateEdgesPositionsMap()
-        graphHolder = GraphHolder(self.edges, self.vertices, self.edgesPositionsMap)
+        graphHolder = GraphHolder(self.edges, self.vertices)
         return graphHolder
 
     def generate2ComponentsGraph(self) -> GraphHolder:
@@ -62,6 +58,3 @@ class GraphGenerator:
 
     def _updateVerticesPositionsMap(self):
         self.verticesPositionsMap.update({self.vertices[i].vertexName: i for i in range(len(self.vertices))})
-
-    def _updateEdgesPositionsMap(self):
-        self.edgesPositionsMap.update({self.edges[i]: i for i in range(len(self.edges))})

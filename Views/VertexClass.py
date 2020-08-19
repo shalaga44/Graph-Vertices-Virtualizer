@@ -15,7 +15,7 @@ from Tokens import VerticesTokens
 class Vertex:
     _color = Colors.VerticesColors.vertexDefaultColor
     _status = VerticesTokens.isDefault
-    _isMoved = True
+    _isMoved = False
 
     _lastIntersectionMemorySize = 6
     _lastIntersectionMemoryIndex = 0
@@ -30,10 +30,15 @@ class Vertex:
 
     def __init__(self, vertexName, pos: Pos):
         self.vertexName: str = str(vertexName)
-        self._pos: Pos = pos
+        self.pos: Pos = pos
         self.generateNewTextImage()
 
+    def __setattr__(self, key, value):
+        if key == "pos": self.isMoved = False
+        return super(Vertex, self).__setattr__(key, value)
+
     def moveCloserTo(self, pos: Pos, distance):
+        if self._status == VerticesTokens.isSelected: return
         diffX = pos.x - self.pos.x
         diffY = pos.y - self.pos.y
         moveX = diffX * distance
@@ -46,7 +51,7 @@ class Vertex:
         self.lastIntersection = distance
 
     def moveAwayFrom(self, pos: Pos, distance):
-
+        if self._status == VerticesTokens.isSelected: return
         if distance == -1.0:
             self.fixOverlapping()
         diffX = pos.x - self.pos.x
@@ -57,15 +62,6 @@ class Vertex:
         self.isMoved = True
         # TODO : REMOVE
         self.lastIntersection = distance
-
-    @property
-    def pos(self):
-        return self._pos
-
-    @pos.setter
-    def pos(self, newPos):
-        # self.isMoved = True
-        self.pos = newPos
 
     @property
     def lastIntersection(self):
@@ -110,7 +106,7 @@ class Vertex:
     def status(self):
         if self._status == VerticesTokens.isSelected:
             return VerticesTokens.isSelected
-        elif self.isMoved or 1:
+        elif self.isMoved:
             return VerticesTokens.isMoving
         else:
             return self._status
@@ -182,5 +178,3 @@ class Vertex:
 
     def fixOverlapping(self):
         self.doCrazySpan(-1.0, 1)
-
-

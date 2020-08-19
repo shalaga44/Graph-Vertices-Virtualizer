@@ -5,7 +5,8 @@ from DataTypes.GraphHolder import GraphHolder
 from LinearMath import getVerticesIntersection, isVerticesIntersecting, isPointInCircle, getDistanceBetween2Vertices
 from Mangers.DimensionsManger import DimensionsManger
 from Mangers.GraphGenerator import GraphGenerator
-from Mangers.VerticesManager import VerticesManger
+from Mangers.vertices_manager import VerticesManger
+from Mangers.edges_manager import EdgesManger
 from SingletonMetaClass import Singleton
 from Views.VertexClass import Vertex
 from Views.EdgeClass import Edge
@@ -16,6 +17,8 @@ class GraphManager():
 
         self.edges: List[Edge] = []
         self.verticesManger: VerticesManger = VerticesManger()
+        self.edgesManger: EdgesManger = EdgesManger()
+        self.adjacencyList: Dict[Vertex, List[Edge]] = {}
         self.edgesPositionsMap: Dict[int, int] = {}
         self.verticesPositionsMap: Dict[int, int] = {}
 
@@ -50,15 +53,16 @@ class GraphManager():
         return self.verticesManger.vertices
 
     def setupFromGraphHolder(self, graphHolder: GraphHolder):
-        self.verticesManger.takeFromGraphHolder(graphHolder)
+        self.verticesManger.importFromGraphHolder(graphHolder)
+        self.edgesManger.importFromGraphHolder(graphHolder)
         self.edges = graphHolder.edges
-        self.edgesPositionsMap = graphHolder.edgesPositionsMap
+        self.edgesPositionsMap = self.edgesManger.edgesPositionsMap
 
     def setupVertices(self):
         if self.isVerticesSetupModeDisabled: return
         allStopped = True
         for vertex in self.verticesManger:
-            if vertex.isMoved or 1:
+            if vertex.isMoved:
                 self._moveVerticesAwayFrom(vertex)
                 self._alignVertexOnScreen(vertex)
             if self.isVertexNotIntersected(vertex):
@@ -82,26 +86,32 @@ class GraphManager():
             self.isCrazySpanningMode = False
 
     def _limitVerticesOfEdge(self, edge: Edge):
+        # l = self.dimentsManger.EdgesDiments.length
+        # tmp_func = lambda x: (x // l / 10) if (x < (l * 9)) else .9
         if self.isEdgesSetupModeDisabled: return
         start: Vertex = self.verticesManger.byName(edge.start)
         end: Vertex = self.verticesManger.byName(edge.end)
         distance = round(getDistanceBetween2Vertices(start, end), 2)
         if distance > self.dimentsManger.EdgesDiments.length:
-            amountOfMovement = round((distance / self.dimentsManger.EdgesDiments.length) / 10, 1)
 
-            if self.isSelectingVertexMode:
-                if self.isSelectedVertex(start):
-                    end.moveCloserTo(start.pos, amountOfMovement)
-                    self._alignVertexOnScreen(end)
-                else:
-                    start.moveCloserTo(end.pos, amountOfMovement)
-                    self._alignVertexOnScreen(start)
+            # amountOfMovement = round((distance / self.dimentsManger.EdgesDiments.length) / 10, 2)
+            amountOfMovement = round(distance / 1000, 3)
 
-            else:
-                end.moveCloserTo(start.pos, amountOfMovement)
-                start.moveCloserTo(end.pos, amountOfMovement)
-                self._alignVertexOnScreen(start)
-                self._alignVertexOnScreen(end)
+            # print(amountOfMovement)
+
+            # if self.isSelectingVertexMode:
+            #     if self.isSelectedVertex(start):
+            #         end.moveCloserTo(start.pos, amountOfMovement)
+            #         self._alignVertexOnScreen(end)
+            #     else:
+            #         start.moveCloserTo(end.pos, amountOfMovement)
+            #         self._alignVertexOnScreen(start)
+            #
+            # else:
+            end.moveCloserTo(start.pos, amountOfMovement / 2)
+            start.moveCloserTo(end.pos, amountOfMovement/2)
+            self._alignVertexOnScreen(start)
+            self._alignVertexOnScreen(end)
 
             self.verticesManger.markAsIntersected(start, end)
         else:

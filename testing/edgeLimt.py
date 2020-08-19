@@ -16,13 +16,13 @@ w, h = 1000, 1000
 v = Visualizer(displaySize=(w, h), scale=1)
 graphGenerator = GraphGenerator(w, h)
 # graphGenerator.vertices.extend([Vertex(44, Pos(w // 2, (h // 2)))])
-graphGenerator.vertices.extend([Vertex(33, Pos(w // 2, (h // 2)))])
-graphGenerator.vertices.extend([Vertex(22, Pos(w // 2, (h // 2)))])
-graphGenerator.edges.extend([Edge
-                             (22, 33)])
-# graphHolder = graphGenerator.generateTriangle()
-graphGenerator.generateTriangle()
-
+# graphGenerator.vertices.extend([Vertex(33, Pos(w // 2, (h // 2)))])
+# graphGenerator.vertices.extend([Vertex(22, Pos(w // 2, (h // 2)))])
+# graphGenerator.edges.extend([Edge
+#                              (22, 33)])
+# # graphHolder = graphGenerator.generateTriangle()
+# graphGenerator.generateTriangle()
+graphGenerator.generate2ComponentsGraph()
 v.graphManger.setupFromGraphHolder(graphGenerator.exportGraphHolder())
 v.startMouseThread()
 font = sdl.font.SysFont(sdl.font.get_default_font(), 30)
@@ -62,8 +62,8 @@ def showPosOfVertices(vertices):
         v.screen.blit(keyImage, [vertex.pos.x - font.size(text)[0] - r, vertex.pos.y - r])
 
 
-# v.toggleVerticesSetupMode()
-# v.toggleEdgesSetupMode()
+v.toggleVerticesSetupMode()
+v.toggleEdgesSetupMode()
 while True:
     v.events()
     v.graphManger.setupVertices()
