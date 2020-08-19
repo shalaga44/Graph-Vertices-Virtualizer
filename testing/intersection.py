@@ -3,10 +3,10 @@ import sys
 import pygame as sdl
 
 import Colors
-from DataTypes.Pos import Pos
-from Mangers.GraphGenerator import GraphGenerator
+from DataTypes.pos import Pos
+from Mangers.graph_generator import GraphGenerator
 from main import Visualizer
-from Views .VertexClass import Vertex, EdgeClass
+from Views .vertex import Vertex, EdgeClass
 
 w, h = 1000, 1000
 v = Visualizer(displaySize=(w, h), scale=3)

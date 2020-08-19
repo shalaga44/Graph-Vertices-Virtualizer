@@ -1,7 +1,7 @@
 from typing import Dict, List
 
-from Views.VertexClass import Vertex
-from Views.EdgeClass import Edge
+from Views.vertex import Vertex
+from Views.edge import Edge
 
 
 class GraphHolder:

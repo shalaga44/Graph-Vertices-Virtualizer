@@ -1,23 +1,23 @@
 from typing import List, Tuple, Dict, Optional
 
-from DataTypes.Pos import Pos
-from DataTypes.GraphHolder import GraphHolder
+from DataTypes.pos import Pos
+from DataTypes.graph_holder import GraphHolder
 from LinearMath import getVerticesIntersection, isVerticesIntersecting, isPointInCircle, getDistanceBetween2Vertices
-from Mangers.DimensionsManger import DimensionsManger
-from Mangers.GraphGenerator import GraphGenerator
-from Mangers.vertices_manager import VerticesManger
-from Mangers.edges_manager import EdgesManger
+from Mangers.dimensions_manger import DimensionsManger
+from Mangers.graph_generator import GraphGenerator
+from Mangers.vertices_manager import VerticesManager
+from Mangers.edges_manager import EdgesManager
 from SingletonMetaClass import Singleton
-from Views.VertexClass import Vertex
-from Views.EdgeClass import Edge
+from Views.vertex import Vertex
+from Views.edge import Edge
 
 
 class GraphManager():
     def __init__(self, width, height):
 
         self.edges: List[Edge] = []
-        self.verticesManger: VerticesManger = VerticesManger()
-        self.edgesManger: EdgesManger = EdgesManger()
+        self.verticesManger: VerticesManager = VerticesManager()
+        self.edgesManger: EdgesManager = EdgesManager()
         self.adjacencyList: Dict[Vertex, List[Edge]] = {}
         self.edgesPositionsMap: Dict[int, int] = {}
         self.verticesPositionsMap: Dict[int, int] = {}
@@ -35,7 +35,6 @@ class GraphManager():
         self.noVerticesIntersecting = False
 
         self.dimentsManger = DimensionsManger()
-
         self.graphGenerator = GraphGenerator(*self.displaySize)
         self.graphGenerator.generate2ComponentsGraph()
 

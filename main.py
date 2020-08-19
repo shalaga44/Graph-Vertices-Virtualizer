@@ -6,10 +6,10 @@ from typing import Final, Tuple
 import pygame as pg
 
 from Colors import MainColors, EdgesColors
-from DataTypes.Pos import Pos
-from Mangers.GraphGenerator import GraphGenerator
-from Mangers.GraphManager import GraphManager, DimensionsManger
-from Views.VertexClass import Vertex
+from DataTypes.pos import Pos
+from Mangers.graph_generator import GraphGenerator
+from Mangers.graph_manager import GraphManager, DimensionsManger
+from Views.vertex import Vertex
 
 
 class Visualizer:

@@ -1,11 +1,11 @@
 from typing import Dict, List, Iterator, Final
 
-from DataTypes.GraphHolder import GraphHolder
+from DataTypes.graph_holder import GraphHolder
 from SingletonMetaClass import Singleton
-from Views.EdgeClass import Edge
+from Views.edge import Edge
 
 
-class EdgesManger(metaclass=Singleton):
+class EdgesManager(metaclass=Singleton):
     def __init__(self):
         self.edges: Final[List[Edge]] = []
         self.edgesPositionsMap: Final[Dict[int, int]] = {}

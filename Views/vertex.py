@@ -8,7 +8,7 @@ from pygame.font import get_default_font
 from pygame.surface import Surface
 
 import Colors
-from DataTypes.Pos import Pos
+from DataTypes.pos import Pos
 from Tokens import VerticesTokens
 
 
@@ -76,7 +76,7 @@ class Vertex:
         return intersection in self._lastIntersectionMemory
 
     def generateNewTextImage(self):
-        from Mangers.GraphManager import DimensionsManger
+        from Mangers.graph_manager import DimensionsManger
         diments = DimensionsManger()
         font = SysFont(get_default_font(), diments.VerticesDiments.fontSize)
         keyImage = font.render(str(self.vertexName), True, Colors.VerticesColors.OnVertexDefaultColor)

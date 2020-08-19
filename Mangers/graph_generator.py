@@ -1,9 +1,9 @@
 from typing import Tuple, List, Dict, Final
 
-from DataTypes.Pos import Pos
-from DataTypes.GraphHolder import GraphHolder
-from Views.VertexClass import Vertex
-from Views.EdgeClass import Edge
+from DataTypes.pos import Pos
+from DataTypes.graph_holder import GraphHolder
+from Views.vertex import Vertex
+from Views.edge import Edge
 
 
 class GraphGenerator:

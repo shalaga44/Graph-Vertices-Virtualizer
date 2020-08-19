@@ -1,12 +1,12 @@
 from typing import Dict, List, Iterator, Final
 
-from DataTypes.GraphHolder import GraphHolder
+from DataTypes.graph_holder import GraphHolder
 from SingletonMetaClass import Singleton
 from Tokens import VerticesTokens
-from Views.VertexClass import Vertex
+from Views.vertex import Vertex
 
 
-class VerticesManger(metaclass=Singleton):
+class VerticesManager(metaclass=Singleton):
     def __init__(self):
         self.selectedVertexName = None
         self.vertices: Final[List[Vertex]] = []

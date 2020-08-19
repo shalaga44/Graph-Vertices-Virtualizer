@@ -1,8 +1,8 @@
 from math import sqrt
 
-from DataTypes.Pos import Pos
-from Views.EdgeClass import Edge
-from Views.VertexClass import Vertex
+from DataTypes.pos import Pos
+from Views.edge import Edge
+from Views.vertex import Vertex
 from typing import Union
 
 

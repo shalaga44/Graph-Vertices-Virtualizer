@@ -5,12 +5,12 @@ from typing import List
 import pygame as sdl
 
 import Colors
-from DataTypes.Pos import Pos
+from DataTypes.pos import Pos
 from LinearMath import getDistanceBetween2Vertices
-from Mangers.GraphGenerator import GraphGenerator
+from Mangers.graph_generator import GraphGenerator
 from main import Visualizer
-from Views.VertexClass import Vertex
-from Views.EdgeClass import Edge
+from Views.vertex import Vertex
+from Views.edge import Edge
 
 w, h = 1000, 1000
 v = Visualizer(displaySize=(w, h), scale=1)
