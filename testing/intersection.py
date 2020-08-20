@@ -1,12 +1,12 @@
-import sys
+import pygame as sdl
 
 import pygame as sdl
 
 import Colors
 from DataTypes.pos import Pos
 from Mangers.graph_generator import GraphGenerator
+from Views.vertex import EdgeClass
 from main import Visualizer
-from Views .vertex import Vertex, EdgeClass
 
 w, h = 1000, 1000
 v = Visualizer(displaySize=(w, h), scale=3)
@@ -42,7 +42,7 @@ while True:
     v.drawEdges()
     v.drawVertices()
 
-    showIntersectionMemory(map(lambda x: x.vertexName, v.graphManger.vertices))
+    showIntersectionMemory(map(lambda x: x.name, v.graphManger.vertices))
 
     v.updateDisplay()
     if firstTime:

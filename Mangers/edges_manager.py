@@ -1,6 +1,7 @@
 from typing import Dict, List, Iterator, Final
 
 from DataTypes.graph_holder import GraphHolder
+from Mangers.vertices_manager import VerticesManager
 from SingletonMetaClass import Singleton
 from Views.edge import Edge
 
@@ -10,8 +11,12 @@ class EdgesManager(metaclass=Singleton):
         self.edges: Final[List[Edge]] = []
         self.edgesPositionsMap: Final[Dict[int, int]] = {}
 
-    def importFromGraphHolder(self, graphHolder: GraphHolder):
-        self.edges.extend(graphHolder.edges)
+    def importFromGraphHolder(self, graphHolder: GraphHolder, verticesManger: VerticesManager):
+        edges = [Edge(verticesManger.byName(edgeHolder.start),
+                      verticesManger.byName(edgeHolder.end))
+                 for edgeHolder in graphHolder.edges]
+
+        self.edges.extend(edges)
         self._updateEdgesPositionsMap()
 
     def _updateEdgesPositionsMap(self):

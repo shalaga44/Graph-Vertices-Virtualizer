@@ -1,9 +1,9 @@
-from typing import Tuple, List, Dict, Final
+from typing import Tuple, List, Final
 
-from DataTypes.pos import Pos
+from DataTypes.edge_holder import EdgeHolder
 from DataTypes.graph_holder import GraphHolder
+from DataTypes.pos import Pos
 from Views.vertex import Vertex
-from Views.edge import Edge
 
 
 class GraphGenerator:
@@ -11,7 +11,7 @@ class GraphGenerator:
         self.width, self.height = width, height
         self.displaySize: Tuple[int, ...] = (width, height)
         self.vertices: Final[List[Vertex]] = []
-        self.edges: Final[List[Edge]] = []
+        self.edges: Final[List[EdgeHolder]] = []
 
     def clearAll(self):
         self.clearEdges()
@@ -25,7 +25,7 @@ class GraphGenerator:
 
     def generateTriangle(self) -> GraphHolder:
         self.vertices.extend([Vertex(3, Pos(20, 20)), Vertex(4, Pos(50, 50)), Vertex(5, Pos(80, 80))])
-        self.edges.extend([Edge(3, 4), Edge(4, 5), Edge(5, 3)])
+        self.edges.extend([EdgeHolder(3, 4), EdgeHolder(4, 5), EdgeHolder(5, 3)])
         return self.exportGraphHolder()
 
     def exportGraphHolder(self) -> GraphHolder:
@@ -43,8 +43,9 @@ class GraphGenerator:
                               Vertex(-4, Pos(*map(lambda x: x // 2, self.displaySize))),
                               Vertex(-7, Pos(*map(lambda x: x // 2, self.displaySize))),
                               Vertex(-8, Pos(*map(lambda x: x // 2, self.displaySize)))])
-        self.edges.extend([Edge(44, 999), Edge(0, 999), Edge(44, 0), Edge(-7, 0), Edge(-8, 44),
-                           Edge(-2, -3), Edge(-3, -4), Edge(-4, -5), Edge(-5, -2)])
+        self.edges.extend(
+            [EdgeHolder(44, 999), EdgeHolder(0, 999), EdgeHolder(44, 0), EdgeHolder(-7, 0), EdgeHolder(-8, 44),
+             EdgeHolder(-2, -3), EdgeHolder(-3, -4), EdgeHolder(-4, -5), EdgeHolder(-5, -2)])
         return self.exportGraphHolder()
 
     def generateVerticesCanFitIn(self, width, height, dimentsManger) -> GraphHolder:
@@ -57,4 +58,4 @@ class GraphGenerator:
         return self.exportGraphHolder()
 
     def _updateVerticesPositionsMap(self):
-        self.verticesPositionsMap.update({self.vertices[i].vertexName: i for i in range(len(self.vertices))})
+        self.verticesPositionsMap.update({self.vertices[i].name: i for i in range(len(self.vertices))})

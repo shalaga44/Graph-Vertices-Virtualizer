@@ -89,7 +89,7 @@ class Visualizer:
         self.clock.tick(self.fps)
         pg.display.update()
         self.screen.fill(MainColors.surfaceColor)
-        moving = not self.graphManger.noVerticesIntersecting
+        moving = not self.graphManger.isVerticesIntersecting
         scaleTag = f"scale:{self.dimentsManger.scaleFactor}" if not self.isScalding else "scaling ..."
         movingTag = f"moving:{moving}"
         verticesSetupTag = f"VerticesSetup:{not self.graphManger.isVerticesSetupModeDisabled}"
@@ -110,7 +110,7 @@ class Visualizer:
     def scaleVerticesDownUpToScale(self):
         scale = 0.1
         while scale <= self.scale:
-            if not self.graphManger.noVerticesIntersecting:
+            if not self.graphManger.isVerticesIntersecting:
                 self.isScalding = True
                 self.dimentsManger.scaleFactor = scale
                 self.graphManger.scaleVertices()

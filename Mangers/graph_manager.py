@@ -1,46 +1,40 @@
-from typing import List, Tuple, Dict, Optional
+from typing import List, Dict, Optional, Final
 
-from DataTypes.pos import Pos
 from DataTypes.graph_holder import GraphHolder
-from LinearMath import getVerticesIntersection, isVerticesIntersecting, isPointInCircle, getDistanceBetween2Vertices
+from DataTypes.pos import Pos
+from LinearMath import getVerticesIntersectingIfExists, isPointInCircle, getDistanceBetween2Vertices
 from Mangers.dimensions_manger import DimensionsManger
+from Mangers.edges_manager import EdgesManager
 from Mangers.graph_generator import GraphGenerator
 from Mangers.vertices_manager import VerticesManager
-from Mangers.edges_manager import EdgesManager
-from SingletonMetaClass import Singleton
-from Views.vertex import Vertex
 from Views.edge import Edge
+from Views.vertex import Vertex
 
 
 class GraphManager():
     def __init__(self, width, height):
 
-        self.edges: List[Edge] = []
-        self.verticesManger: VerticesManager = VerticesManager()
-        self.edgesManger: EdgesManager = EdgesManager()
-        self.adjacencyList: Dict[Vertex, List[Edge]] = {}
-        self.edgesPositionsMap: Dict[int, int] = {}
-        self.verticesPositionsMap: Dict[int, int] = {}
+        self.adjacencyList: Final[Dict[Vertex, List[Edge]]] = dict()
+        self.verticesManger: Final[VerticesManager] = VerticesManager()
+        self.edgesManger: Final[EdgesManager] = EdgesManager()
 
         self.width, self.height = width, height
-        self.displaySize: Tuple[int, ...] = (width, height)
-        self.displaySizeHalf: Tuple[int, ...] = (width // 2, height // 2)
 
         self.isVerticesSetupModeDisabled = False
         self.isEdgesSetupModeDisabled = False
-        self._isCrazySpanningModeDisabled = False
+        self.isCrazySpanningModeDisabled = False
 
         self._isCrazySpanningMode = True
         self.isSelectingVertexMode = False
-        self.noVerticesIntersecting = False
+        self.isVerticesIntersecting = True
 
         self.dimentsManger = DimensionsManger()
-        self.graphGenerator = GraphGenerator(*self.displaySize)
+        self.graphGenerator = GraphGenerator(width, height)
         self.graphGenerator.generate2ComponentsGraph()
 
     @property
     def isCrazySpanningMode(self) -> Optional[bool]:
-        return None if self._isCrazySpanningModeDisabled \
+        return None if self.isCrazySpanningModeDisabled \
             else self._isCrazySpanningMode
 
     @isCrazySpanningMode.setter
@@ -51,11 +45,13 @@ class GraphManager():
     def vertices(self):
         return self.verticesManger.vertices
 
+    @property
+    def edges(self):
+        return self.edgesManger.edges
+
     def setupFromGraphHolder(self, graphHolder: GraphHolder):
         self.verticesManger.importFromGraphHolder(graphHolder)
-        self.edgesManger.importFromGraphHolder(graphHolder)
-        self.edges = graphHolder.edges
-        self.edgesPositionsMap = self.edgesManger.edgesPositionsMap
+        self.edgesManger.importFromGraphHolder(graphHolder, self.verticesManger)
 
     def setupVertices(self):
         if self.isVerticesSetupModeDisabled: return
@@ -69,27 +65,27 @@ class GraphManager():
             else:
                 allStopped = False
         if allStopped:
-            self.noVerticesIntersecting = True
+            self.isVerticesIntersecting = False
             self.isCrazySpanningMode = False
 
     def setupEdges(self):
         if self.isEdgesSetupModeDisabled: return
         allStopped = True
-        for edge in self.edges:
+        for edge in self.edgesManger:
             self._limitVerticesOfEdge(edge)
-            if not self.isVertexNotIntersected(self.verticesManger.byName(edge.start)):
-                if not self.isVertexNotIntersected(self.verticesManger.byName(edge.end)):
+            if not self.isVertexNotIntersected(edge.start):
+                if not self.isVertexNotIntersected(edge.end):
                     allStopped = False
         if allStopped:
-            self.noVerticesIntersecting = True
+            self.isVerticesIntersecting = False
             self.isCrazySpanningMode = False
 
     def _limitVerticesOfEdge(self, edge: Edge):
         # l = self.dimentsManger.EdgesDiments.length
         # tmp_func = lambda x: (x // l / 10) if (x < (l * 9)) else .9
         if self.isEdgesSetupModeDisabled: return
-        start: Vertex = self.verticesManger.byName(edge.start)
-        end: Vertex = self.verticesManger.byName(edge.end)
+        start = edge.start
+        end = edge.end
         distance = round(getDistanceBetween2Vertices(start, end), 2)
         if distance > self.dimentsManger.EdgesDiments.length:
 
@@ -108,7 +104,7 @@ class GraphManager():
             #
             # else:
             end.moveCloserTo(start.pos, amountOfMovement / 2)
-            start.moveCloserTo(end.pos, amountOfMovement/2)
+            start.moveCloserTo(end.pos, amountOfMovement / 2)
             self._alignVertexOnScreen(start)
             self._alignVertexOnScreen(end)
 
@@ -129,7 +125,7 @@ class GraphManager():
         for vertex in self.verticesManger:
             if fixedVertex == vertex: continue
             if not self.isSelectedVertex(vertex):
-                intersection = isVerticesIntersecting(fixedVertex, vertex, radius)
+                intersection = getVerticesIntersectingIfExists(fixedVertex, vertex, radius)
                 if intersection:
                     self.doCrazySpanningIfPossible(vertex, intersection)
                     vertex.moveAwayFrom(fixedVertex.pos, self.normalizedDistanceOf(intersection))
@@ -185,6 +181,14 @@ class GraphManager():
         self.isCrazySpanningMode = True if not self.isCrazySpanningMode \
             else False
 
+    def toggleVerticesSetupMode(self):
+        self.isVerticesSetupModeDisabled = False if self.isVerticesSetupModeDisabled \
+            else True
+
+    def toggleEdgesSetupMode(self):
+        self.isEdgesSetupModeDisabled = False if self.isEdgesSetupModeDisabled \
+            else True
+
     def startCrazySpanning(self):
         self.isCrazySpanningMode = True
 
@@ -195,14 +199,6 @@ class GraphManager():
     def doCrazySpanningIfPossible(self, v: Vertex, intersection: float):
         if self.isCrazySpanningMode:
             v.doCrazySpan(intersection, self.dimentsManger.EdgesDiments.length)
-
-    def toggleVerticesSetupMode(self):
-        self.isVerticesSetupModeDisabled = False if self.isVerticesSetupModeDisabled \
-            else True
-
-    def toggleEdgesSetupMode(self):
-        self.isEdgesSetupModeDisabled = False if self.isEdgesSetupModeDisabled \
-            else True
 
     def normalizedDistanceOf(self, intersection) -> float:
         return round(intersection /

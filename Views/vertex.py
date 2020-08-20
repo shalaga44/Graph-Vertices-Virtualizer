@@ -1,7 +1,7 @@
 import itertools
 import random
 from copy import deepcopy
-from typing import Dict, Set, Final, NoReturn
+from typing import Dict, Set, Final, NoReturn, Tuple
 
 from pygame.font import SysFont
 from pygame.font import get_default_font
@@ -17,7 +17,7 @@ class Vertex:
     _status = VerticesTokens.isDefault
     _isMoved = False
 
-    _lastIntersectionMemorySize = 6
+    _lastIntersectionMemorySize = 10
     _lastIntersectionMemoryIndex = 0
     _lastIntersectionMemory: Final[Set[float]] = {float(emptyCell)
                                                   for emptyCell in range(_lastIntersectionMemorySize)}
@@ -29,13 +29,9 @@ class Vertex:
     textImage: Surface
 
     def __init__(self, vertexName, pos: Pos):
-        self.vertexName: str = str(vertexName)
+        self.name: str = str(vertexName)
         self.pos: Pos = pos
         self.generateNewTextImage()
-
-    def __setattr__(self, key, value):
-        if key == "pos": self.isMoved = False
-        return super(Vertex, self).__setattr__(key, value)
 
     def moveCloserTo(self, pos: Pos, distance):
         if self._status == VerticesTokens.isSelected: return
@@ -72,29 +68,29 @@ class Vertex:
         if self.isLastIntersection(newIntersection): return
         self.addNewIntersectionToMemory(newIntersection)
 
-    def isLastIntersection(self, intersection: float):
+    def isLastIntersection(self, intersection: float) -> bool:
         return intersection in self._lastIntersectionMemory
 
-    def generateNewTextImage(self):
+    def generateNewTextImage(self) -> NoReturn:
         from Mangers.graph_manager import DimensionsManger
         diments = DimensionsManger()
         font = SysFont(get_default_font(), diments.VerticesDiments.fontSize)
-        keyImage = font.render(str(self.vertexName), True, Colors.VerticesColors.OnVertexDefaultColor)
-        wText, hText = font.size(str(self.vertexName))
+        keyImage = font.render(str(self.name), True, Colors.VerticesColors.OnVertexDefaultColor)
+        wText, hText = font.size(str(self.name))
         self.wTextHalf, self.hTextHalf = wText // 2, hText // 2
         self.textImage = keyImage
         self.isMoved = True
 
     @property
-    def textPos(self):
+    def textPos(self) -> Tuple[int, int]:
         return self.pos.x - self.wTextHalf, self.pos.y - self.hTextHalf
 
     @property
-    def color(self):
+    def color(self) -> Tuple[int, int, int]:
         return self._color
 
     @property
-    def isMoved(self):
+    def isMoved(self) -> bool:
         return self._isMoved
 
     @isMoved.setter
@@ -103,7 +99,7 @@ class Vertex:
         self._isMoved = b
 
     @property
-    def status(self):
+    def status(self) -> VerticesTokens:
         if self._status == VerticesTokens.isSelected:
             return VerticesTokens.isSelected
         elif self.isMoved:
@@ -134,7 +130,7 @@ class Vertex:
         return result
 
     def __str__(self):
-        return self.vertexName
+        return self.name
 
     def __repr__(self):
         return self.__str__()

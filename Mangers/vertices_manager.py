@@ -22,10 +22,10 @@ class VerticesManager(metaclass=Singleton):
 
     def isSelectedVertex(self, v: Vertex) -> bool:
         if self.selectedVertexName is None: return False
-        return v.vertexName == self.selectedVertexName
+        return v.name == self.selectedVertexName
 
     def updateSelectedVertex(self, selectedVertex: Vertex):
-        self.selectedVertexName = selectedVertex.vertexName
+        self.selectedVertexName = selectedVertex.name
         selectedVertex.status = VerticesTokens.isSelected
 
     def clearSelectedVertex(self):
@@ -34,7 +34,7 @@ class VerticesManager(metaclass=Singleton):
         self.selectedVertexName = None
 
     def getIdOf(self, v: Vertex) -> int:
-        return self.verticesPositionsMap[v.vertexName]
+        return self.verticesPositionsMap[v.name]
 
     def getIdByName(self, vertexName: str) -> int:
         return self.verticesPositionsMap[vertexName]
@@ -55,7 +55,7 @@ class VerticesManager(metaclass=Singleton):
         self.intersectionMap[self.getIdOf(u)][self.getIdOf(v)] = status
 
     def _updateVerticesPositionsMap(self):
-        self.verticesPositionsMap.update({v.vertexName: idx
+        self.verticesPositionsMap.update({v.name: idx
                                           for idx, v in enumerate(self.vertices)})
         self._initIntersectionMap()
 

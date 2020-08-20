@@ -1,12 +1,11 @@
 from math import sqrt
-
-from DataTypes.pos import Pos
-from Views.edge import Edge
-from Views.vertex import Vertex
 from typing import Union
 
+from DataTypes.pos import Pos
+from Views.vertex import Vertex
 
-def isVerticesIntersecting(v: Vertex, u: Vertex, radius: int) -> Union[int, bool]:
+
+def getVerticesIntersectingIfExists(v: Vertex, u: Vertex, radius: int) -> Union[int, bool]:
     intersection = getCirclesIntersection(v.pos.x, v.pos.y, u.pos.x, u.pos.y, radius, radius)
     if intersection < 0:
         return intersection

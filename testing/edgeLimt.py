@@ -1,16 +1,14 @@
-import sys
 from math import trunc
 from typing import List
 
 import pygame as sdl
 
 import Colors
-from DataTypes.pos import Pos
 from LinearMath import getDistanceBetween2Vertices
 from Mangers.graph_generator import GraphGenerator
-from main import Visualizer
-from Views.vertex import Vertex
 from Views.edge import Edge
+from Views.vertex import Vertex
+from main import Visualizer
 
 w, h = 1000, 1000
 v = Visualizer(displaySize=(w, h), scale=1)
@@ -31,23 +29,18 @@ font = sdl.font.SysFont(sdl.font.get_default_font(), 30)
 def showDistanceBetweenVertices(vertices: List[Vertex]):
     posY = 0
     for vertex in vertices:
-        name = vertex.vertexName
+        name = vertex.name
         text = f"{name:^3} dist:{vertex._lastIntersectionMemory}"
         keyImage = font.render(text, True, Colors.MainColors.onSurfaceColor)
         v.screen.blit(keyImage, [0, posY])
         posY += font.size(name)[1]
 
 
-firstTime = False
-
-
 def showDistanceBetweenEdges(edges: List[Edge]):
     posY = 0
     for edge in edges:
-        startV = v.graphManger.verticesManger.byName(edge.start)
-        endV = v.graphManger.verticesManger.byName(edge.end)
-        length = getDistanceBetween2Vertices(startV, endV)
-        text = f"{edge.start:^3}-{trunc(length)}->{edge.end:^3}"
+        length = getDistanceBetween2Vertices(edge.start, edge.end)
+        text = f"{edge.start.name:^3}-{trunc(length)}->{edge.end.name:^3}"
         keyImage = font.render(text, True, Colors.MainColors.onSurfaceColor)
         posX = h - font.size(text)[0]
         v.screen.blit(keyImage, [posX - 20, posY])
@@ -64,6 +57,11 @@ def showPosOfVertices(vertices):
 
 v.toggleVerticesSetupMode()
 v.toggleEdgesSetupMode()
+firstTime = True
+secondTime = False
+thirdTime = False
+fourthTime = False
+fifthTime = False
 while True:
     v.events()
     v.graphManger.setupVertices()
@@ -77,5 +75,26 @@ while True:
 
     v.updateDisplay()
     if firstTime:
+        v.toggleVerticesSetupMode()
+        firstTime = False
+        secondTime = True
+
+    elif secondTime and v.graphManger.isVerticesIntersecting:
+        v.toggleEdgesSetupMode()
+        v.startCrazySpanningMode()
+        secondTime = False
+        thirdTime = True
+
+    elif thirdTime and v.graphManger.isVerticesIntersecting:
+        v.startCrazySpanningMode()
+        thirdTime = False
+        fourthTime = True
+
+    elif fourthTime and not v.graphManger.isVerticesIntersecting:
+        v.toggleVerticesSetupMode()
+        fourthTime = False
+        fifthTime = True
+
+    elif fifthTime and v.graphManger.isVerticesIntersecting:
         v.toggleVerticesSetupMode()
         firstTime = False
