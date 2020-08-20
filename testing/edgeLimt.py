@@ -36,6 +36,11 @@ def showDistanceBetweenVertices(vertices: List[Vertex]):
         posY += font.size(name)[1]
 
 
+def showIntersectionCircle(vertices: List[Vertex]):
+    for vertex in vertices:
+        sdl.draw.circle(v.screen, (255, 20, 200), tuple(vertex.pos), v.dimentsManger.VerticesDiments.intersectionRadius)
+
+
 def showDistanceBetweenEdges(edges: List[Edge]):
     posY = 0
     for edge in edges:
@@ -64,6 +69,8 @@ fourthTime = False
 fifthTime = False
 while True:
     v.events()
+    showIntersectionCircle(v.graphManger.verticesManger.vertices)
+
     v.graphManger.setupVertices()
     v.graphManger.setupEdges()
     v.drawEdges()
