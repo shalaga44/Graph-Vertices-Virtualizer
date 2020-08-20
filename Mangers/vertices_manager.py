@@ -1,24 +1,37 @@
-from typing import Dict, List, Iterator, Final
+import itertools
+import random
+from typing import Dict, List, Iterator, Final, Any
 
 from DataTypes.graph_holder import GraphHolder
-from SingletonMetaClass import Singleton
+from DataTypes.pos import Pos
+from DataTypes.vertex_holder import VertexHolder
 from Tokens import VerticesTokens
 from Views.vertex import Vertex
 
 
-class VerticesManager(metaclass=Singleton):
+class VerticesManager():
     def __init__(self):
         self.selectedVertexName = None
-        self.vertices: Final[List[Vertex]] = []
+        self._vertices: Final[List[Vertex]] = []
         self.verticesPositionsMap: Final[Dict[str, int]] = {}
         self.intersectionMap: Final[Dict[int, List[bool]]] = {}
 
+    @property
+    def vertices(self):
+        return self._vertices
+
     def importFromGraphHolder(self, graphHolder: GraphHolder):
-        self.vertices.extend(graphHolder.vertices)
+        self._vertices.extend(graphHolder.vertices)
+        self._updateVerticesPositionsMap()
+
+    def addVertices(self, verticesHolder: List[VertexHolder]):
+        newVertices = [self.createVertex(vertexHolder.name)
+                       for vertexHolder in verticesHolder]
+        self._vertices.extend(newVertices)
         self._updateVerticesPositionsMap()
 
     def byName(self, vertexName: str) -> Vertex:
-        return self.vertices[self.verticesPositionsMap[str(vertexName)]]
+        return self._vertices[self.verticesPositionsMap[str(vertexName)]]
 
     def isSelectedVertex(self, v: Vertex) -> bool:
         if self.selectedVertexName is None: return False
@@ -56,7 +69,7 @@ class VerticesManager(metaclass=Singleton):
 
     def _updateVerticesPositionsMap(self):
         self.verticesPositionsMap.update({v.name: idx
-                                          for idx, v in enumerate(self.vertices)})
+                                          for idx, v in enumerate(self._vertices)})
         self._initIntersectionMap()
 
     @property
@@ -64,13 +77,13 @@ class VerticesManager(metaclass=Singleton):
         return self.byName(self.selectedVertexName)
 
     def __getitem__(self, key) -> Vertex:
-        return self.vertices[key]
+        return self._vertices[key]
 
     def __iter__(self) -> Iterator[Vertex]:
-        return iter(self.vertices)
+        return iter(self._vertices)
 
     def _initIntersectionMap(self):
-        self.intersectionMap.update({self.getIdByName(k): [True] * len(self.vertices)
+        self.intersectionMap.update({self.getIdByName(k): [True] * len(self._vertices)
                                      for k in self.verticesPositionsMap.keys()})
 
         # vertex can't intersect with herself
@@ -80,3 +93,10 @@ class VerticesManager(metaclass=Singleton):
     def scaleVertices(self):
         for vertex in self:
             vertex.generateNewTextImage()
+
+    @staticmethod
+    def createVertex(VertexName: Any, pos: Pos = None) -> Vertex:
+        if pos is None: pos = Pos(*random.choice(
+            list(itertools.permutations(
+                [-3, 0, 3, 1], 2))))
+        return Vertex(VertexName, pos)

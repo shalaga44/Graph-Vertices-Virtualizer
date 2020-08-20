@@ -1,3 +1,5 @@
+from typing import Iterator
+
 from Views.vertex import Vertex
 
 
@@ -12,3 +14,6 @@ class Edge:
 
     def __repr__(self):
         return self._str
+
+    def __iter__(self) -> Iterator[Vertex]:
+        return iter((self.start, self.end))

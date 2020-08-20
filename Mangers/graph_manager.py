@@ -16,7 +16,7 @@ class GraphManager():
 
         self.adjacencyList: Final[Dict[Vertex, List[Edge]]] = dict()
         self.verticesManger: Final[VerticesManager] = VerticesManager()
-        self.edgesManger: Final[EdgesManager] = EdgesManager()
+        self.edgesManger: Final[EdgesManager] = EdgesManager(self.verticesManger)
 
         self.width, self.height = width, height
 
@@ -51,7 +51,7 @@ class GraphManager():
 
     def setupFromGraphHolder(self, graphHolder: GraphHolder):
         self.verticesManger.importFromGraphHolder(graphHolder)
-        self.edgesManger.importFromGraphHolder(graphHolder, self.verticesManger)
+        self.edgesManger.importFromGraphHolder(graphHolder)
 
     def setupVertices(self):
         if self.isVerticesSetupModeDisabled: return
@@ -84,8 +84,8 @@ class GraphManager():
         # l = self.dimentsManger.EdgesDiments.length
         # tmp_func = lambda x: (x // l / 10) if (x < (l * 9)) else .9
         if self.isEdgesSetupModeDisabled: return
-        start = edge.start
-        end = edge.end
+        start = self.verticesManger.byName(edge.start.name)
+        end = self.verticesManger.byName(edge.end.name)
         distance = round(getDistanceBetween2Vertices(start, end), 2)
         if distance > self.dimentsManger.EdgesDiments.length:
 

@@ -4,7 +4,6 @@ from typing import List
 import pygame as sdl
 
 import Colors
-from LinearMath import getDistanceBetween2Vertices
 from Mangers.graph_generator import GraphGenerator
 from Views.edge import Edge
 from Views.vertex import Vertex
@@ -18,8 +17,8 @@ graphGenerator = GraphGenerator(w, h)
 # graphGenerator.vertices.extend([Vertex(22, Pos(w // 2, (h // 2)))])
 # graphGenerator.edges.extend([Edge
 #                              (22, 33)])
-# # graphHolder = graphGenerator.generateTriangle()
-# graphGenerator.generateTriangle()
+# graphHolder = graphGenerator.generateTriangle()
+graphGenerator.generateTriangle()
 graphGenerator.generate2ComponentsGraph()
 v.graphManger.setupFromGraphHolder(graphGenerator.exportGraphHolder())
 v.startMouseThread()
@@ -39,7 +38,7 @@ def showDistanceBetweenVertices(vertices: List[Vertex]):
 def showDistanceBetweenEdges(edges: List[Edge]):
     posY = 0
     for edge in edges:
-        length = getDistanceBetween2Vertices(edge.start, edge.end)
+        length = v.graphManger.edgesManger.length(edge)
         text = f"{edge.start.name:^3}-{trunc(length)}->{edge.end.name:^3}"
         keyImage = font.render(text, True, Colors.MainColors.onSurfaceColor)
         posX = h - font.size(text)[0]
