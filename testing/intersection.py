@@ -1,22 +1,23 @@
-import pygame as sdl
+from typing import List
 
 import pygame as sdl
 
 import Colors
-from DataTypes.pos import Pos
+from DataTypes.edge_holder import EdgeHolder
+from DataTypes.vertex_holder import VertexHolder
 from Mangers.graph_generator import GraphGenerator
-from Views.vertex import EdgeClass
+from Views.vertex import Vertex
 from main import Visualizer
 
 w, h = 1000, 1000
-v = Visualizer(displaySize=(w, h), scale=3)
+v = Visualizer(displaySize=(w, h), scale=1)
 graphGenerator = GraphGenerator(w, h)
-graphGenerator.vertices.extend([VertexClass(44, Pos(w // 2, (h // 2)))])
-graphGenerator.vertices.extend([VertexClass(33, Pos(w // 2, (h // 2)))])
-graphGenerator.vertices.extend([VertexClass(22, Pos(w // 2, (h // 2)))])
-graphGenerator.edges.extend([EdgeClass(22, 33)])
+graphGenerator.verticesManger.addVertices([VertexHolder(44)])
+graphGenerator.verticesManger.addVertices([VertexHolder(33)])
+graphGenerator.verticesManger.addVertices([VertexHolder(22)])
+graphGenerator.edgesManger.addEdges([EdgeHolder(22, 33)])
 # graphHolder = graphGenerator.generateTriangle()
-graphHolder = graphGenerator.generateTriangle()
+graphHolder = graphGenerator.generateTriangle
 
 v.graphManger.setupFromGraphHolder(graphGenerator.exportGraphHolder())
 v.startMouseThread()
@@ -33,9 +34,16 @@ def showIntersectionMemory(verticesName):
         posY += font.size(name)[1]
 
 
+def showIntersectionCircle(vertices: List[Vertex]):
+    for vertex in vertices:
+        sdl.draw.circle(v.screen, (255, 20, 200), tuple(vertex.pos), v.dimentsManger.VerticesDiments.intersectionRadius)
+
+
 firstTime = False
 while True:
     v.events()
+
+    showIntersectionCircle(v.graphManger.vertices)
 
     v.graphManger.setupVertices()
     v.graphManger.setupEdges()

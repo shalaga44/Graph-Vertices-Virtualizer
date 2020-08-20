@@ -30,8 +30,10 @@ class GraphGenerator:
         self.edges.clear()
 
     def generateTriangle(self) -> GraphHolder:
-        self.verticesManger.addVertices([VertexHolder(3), VertexHolder(4), VertexHolder(5)])
-        self.edgesManger.addEdges([EdgeHolder(3, 4), EdgeHolder(4, 5), EdgeHolder(5, 3)])
+        count = len(self.verticesManger.vertices)
+        self.verticesManger.addVertices([VertexHolder(count), VertexHolder(count + 1), VertexHolder(count + 2)])
+        self.edgesManger.addEdges(
+            [EdgeHolder(count, count + 1), EdgeHolder(count + 1, count + 2), EdgeHolder(count + 2, count)])
         return self.exportGraphHolder()
 
     def exportGraphHolder(self) -> GraphHolder:
@@ -39,29 +41,37 @@ class GraphGenerator:
         return graphHolder
 
     def generate2ComponentsGraph(self) -> GraphHolder:
-        edges = [EdgeHolder(44, 999), EdgeHolder(0, 999), EdgeHolder(44, 0), EdgeHolder(-7, 0), EdgeHolder(-8, 44),
-                 EdgeHolder(-2, -3), EdgeHolder(-3, -4), EdgeHolder(-4, -5), EdgeHolder(-5, -2)]
+        count = len(self.verticesManger.vertices)
+
+        edges = [EdgeHolder(count, count + 3),
+                 EdgeHolder(count, count + 1),
+                 EdgeHolder(count + 1, count + 3),
+                 EdgeHolder(count + 8, count + 1),
+                 EdgeHolder(count + 4, count + 5),
+                 EdgeHolder(count + 5, count + 7),
+                 EdgeHolder(count + 6, count + 4),
+                 EdgeHolder(count + 7, count + 6),
+                 EdgeHolder(count + 9, count)]
         self.edgesManger.addEdges(edges)
 
         vertices = [
-            VertexHolder(44),
-            VertexHolder(0),
-            VertexHolder(-1),
-            VertexHolder(999),
-            VertexHolder(-2),
-            VertexHolder(-3),
-            VertexHolder(-5),
-            VertexHolder(-4),
-            VertexHolder(-7),
-            VertexHolder(-8)]
+            VertexHolder(count),
+            VertexHolder(count + 1),
+            VertexHolder(count + 2),
+            VertexHolder(count + 3),
+            VertexHolder(count + 4),
+            VertexHolder(count + 5),
+            VertexHolder(count + 6),
+            VertexHolder(count + 7),
+            VertexHolder(count + 8),
+            VertexHolder(count + 9)]
         self.verticesManger.addVertices(vertices)
-
         return self.exportGraphHolder()
 
     def generateVerticesCanFitIn(self, width, height, dimentsManger) -> GraphHolder:
         c, r = ((width // (dimentsManger.VerticesDiments.radius * 2)) // 2), (
                 (height // (dimentsManger.VerticesDiments.radius * 2)) // 2)
-        self.vertices.extend([Vertex(i, Pos(((i % c) * (width // c)),
+        self.vertices.extend([Vertex(-i, Pos(((i % c) * (width // c)),
                                             ((i // c) * (height // r))))
                               for i in range(c * r)])
         return self.exportGraphHolder()
