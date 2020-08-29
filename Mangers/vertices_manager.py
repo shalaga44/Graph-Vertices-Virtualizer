@@ -25,7 +25,7 @@ class VerticesManager():
         self._updateVerticesPositionsMap()
 
     def addVertices(self, verticesHolder: List[VertexHolder]):
-        newVertices = [self.createVertex(vertexHolder.name)
+        newVertices = [self.createVertex(vertexHolder.name, vertexHolder.pos)
                        for vertexHolder in verticesHolder]
         self._vertices.extend(newVertices)
         self._updateVerticesPositionsMap()
