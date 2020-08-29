@@ -1,3 +1,4 @@
+import math
 from math import trunc
 from typing import List
 
@@ -13,21 +14,19 @@ from Views.vertex import Vertex
 from main import Visualizer
 
 
-# 𝑓𝑥(𝑡):=(1−𝑡)3𝑝1𝑥+3𝑡(1−𝑡)2𝑝2𝑥+3𝑡2(1−𝑡)𝑝3𝑥+𝑡3𝑝4𝑥
-def calculatePoints(t: float, start: Pos, c1: Pos, c2: Pos, end: Pos) -> Pos:
-    x: float = \
-        ((1.0 - t) ** 3.0) * start.x + 3 * t * ((1.0 - t) ** 2.0) * c1.x + 3 * t * t * (
-                1.0 - t) * c2.x + t * t * t * end.x
-    y: float = \
-        ((1.0 - t) ** 3.0) * start.y + 3 * t * ((1.0 - t) ** 2.0) * c1.y + 3 * t * t * (
-                1.0 - t) * c2.y + t * t * t * end.y
+def calculatePoints(t: float, controlPoints: List[Pos]) -> Pos:
+    if not 0 <= t <= 1: raise Exception("t: float ∈ [0,1]")
+    n: int = len(controlPoints) - 1
+    y: float = sum((pow((1 - t), n - i) * pow(t, i) * math.comb(n, i) * p.y) for i, p in enumerate(controlPoints))
+    x: float = sum((pow((1 - t), n - i) * pow(t, i) * math.comb(n, i) * p.x) for i, p in enumerate(controlPoints))
+
     return Pos(int(x), int(y))
 
 
 w, h = 1000, 1000
 v = Visualizer(displaySize=(w, h), scale=1)
-vertices = [VertexHolder(0, (706, 568)), VertexHolder(1, (667, 302)), VertexHolder(2, (329, 312)),
-            VertexHolder(3, (305, 579))]
+vertices = [VertexHolder(0, (706, 568)), VertexHolder(1, (667, 312)), VertexHolder(2, (329, 312)),
+            VertexHolder(3, (305, 579)), VertexHolder(-1, (500, 210))]
 graphGenerator = GraphGenerator(w, h)
 graphGenerator.verticesManger.addVertices(vertices)
 v.graphManger.setupFromGraphHolder(graphGenerator.exportGraphHolder())
@@ -69,33 +68,42 @@ def showPosOfVertices(vertices):
         v.screen.blit(keyImage, [vertex.pos.x - font.size(text)[0] - r, vertex.pos.y - r])
 
 
-v.toggleVerticesSetupMode()
-v.toggleEdgesSetupMode()
+animationTime = 100
+animationEnd = 100
 
 
 def RUN_BUTTON_ACTION():
-    print("Boooooo")
+    global animationTime
+    animationTime = 0
 
 
 bW, bH = 100, 60
-RUN_BUTTON = Button("run", Pos(((w // 2) - (bW // 2)), (h // 4) * 3), _width=bW, _height=bH)
-# RUN_BUTTON.setOnClick(RUN_BUTTON_ACTION)
+RUN_BUTTON = Button("run", Pos(((w // 2) - (bW // 2)), (h // 4) * 3))
+RUN_BUTTON.setOnClick(RUN_BUTTON_ACTION)
 v.buttons.append(RUN_BUTTON)
+
+circlePos = Pos(0, 0)
 while True:
     v.events()
-    showIntersectionCircle(v.graphManger.verticesManger.vertices)
-    t = 0.0
+    # showIntersectionCircle(v.graphManger.verticesManger.vertices)
+    T = 0.0
     points = []
-    while t < 1.0:
-        pos: Pos = calculatePoints(t,
-                                   v.graphManger.verticesManger.byName(0).pos,
-                                   v.graphManger.verticesManger.byName(1).pos,
-                                   v.graphManger.verticesManger.byName(2).pos,
-                                   v.graphManger.verticesManger.byName(3).pos,
+    while T < 1.0:
+        pos: Pos = calculatePoints(T,
+                                   [v.graphManger.verticesManger.byName(0).pos,
+                                    v.graphManger.verticesManger.byName(1).pos,
+                                    v.graphManger.verticesManger.byName(-1).pos,
+                                    v.graphManger.verticesManger.byName(2).pos,
+                                    v.graphManger.verticesManger.byName(3).pos]
                                    )
         points.append(tuple(pos))
-        t += .01
+        T += .01
     sdl.draw.lines(v.screen, Colors.MainColors.onSurfaceColor, (), points, 5)
+
+    if animationTime < animationEnd:
+        circlePos = points[animationTime]
+        sdl.draw.circle(v.screen, Colors.red, tuple(circlePos), 20)
+        animationTime += 1
 
     v.graphManger.setupVertices()
     v.graphManger.setupEdges()
