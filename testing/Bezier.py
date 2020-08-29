@@ -2,12 +2,12 @@ from math import trunc
 from typing import List
 
 import pygame as sdl
-from pygame.rect import Rect
 
 import Colors
 from DataTypes.pos import Pos
 from DataTypes.vertex_holder import VertexHolder
 from Mangers.graph_generator import GraphGenerator
+from Views.button import Button
 from Views.edge import Edge
 from Views.vertex import Vertex
 from main import Visualizer
@@ -69,46 +69,18 @@ def showPosOfVertices(vertices):
         v.screen.blit(keyImage, [vertex.pos.x - font.size(text)[0] - r, vertex.pos.y - r])
 
 
-class Button:
-    def __init__(self, _text: str, _pos: Pos, _width: int = 100, _height: int = 100):
-        self._width = _width
-        self._height = _height
-        self._text = str(_text)
-        self._pos = _pos
-        self.colorText = Colors.MainColors.surfaceColor
-        self.colorBackground = Colors.MainColors.onSurfaceColor
-        self._rect = self._createRect(_pos.x, _pos.y, _width, _height)
-        self._textImage = self._creatText(_text)
-
-    @staticmethod
-    def _createRect(left, top, _width, height) -> Rect:
-        rect = sdl.rect.Rect(left, top, _width, height)
-        return rect
-
-    def _drawRect(self, screen: sdl.display):
-        sdl.draw.rect(screen, self.colorBackground, self._rect)
-
-    def _drawText(self, screen: sdl.display):
-        screen.blit(self._textImage, self.textPos)
-
-    def draw(self, screen: sdl.display):
-        self._drawRect(screen)
-        self._drawText(screen)
-
-    def _creatText(self, _text) -> sdl.Surface:
-        textImage = font.render(self._text, True, self.colorText)
-        wText, hText = font.size(self._text)
-        self.wTextHalf, self.hTextHalf = wText // 2, hText // 2
-        self.textPos = (self._pos.x + (self._width // 2)) - self.wTextHalf, (
-                self._pos.y + (self._height // 2)) - self.hTextHalf
-        self._textImage = textImage
-        return textImage
-
 v.toggleVerticesSetupMode()
 v.toggleEdgesSetupMode()
-bW, bH = 100, 60
-b = Button("run", Pos(((w // 2)-(bW//2)), (h // 4) * 3), _width=bW, _height=bH)
 
+
+def RUN_BUTTON_ACTION():
+    print("Boooooo")
+
+
+bW, bH = 100, 60
+RUN_BUTTON = Button("run", Pos(((w // 2) - (bW // 2)), (h // 4) * 3), _width=bW, _height=bH)
+# RUN_BUTTON.setOnClick(RUN_BUTTON_ACTION)
+v.buttons.append(RUN_BUTTON)
 while True:
     v.events()
     showIntersectionCircle(v.graphManger.verticesManger.vertices)
@@ -124,11 +96,12 @@ while True:
         points.append(tuple(pos))
         t += .01
     sdl.draw.lines(v.screen, Colors.MainColors.onSurfaceColor, (), points, 5)
-    b.draw(v.screen)
+
     v.graphManger.setupVertices()
     v.graphManger.setupEdges()
     v.drawEdges()
     v.drawVertices()
+    v.drawButtons()
     # showDistanceBetweenVertices(v.graphManger.vertices)
     showPosOfVertices(v.graphManger.vertices)
     showDistanceBetweenEdges(v.graphManger.edges)

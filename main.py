@@ -1,7 +1,7 @@
 import sys
 from copy import deepcopy
 from threading import Thread
-from typing import Final, Tuple
+from typing import Final, Tuple, List
 
 import pygame as pg
 
@@ -9,6 +9,7 @@ from Colors import MainColors, EdgesColors
 from DataTypes.pos import Pos
 from Mangers.graph_generator import GraphGenerator
 from Mangers.graph_manager import GraphManager, DimensionsManger
+from Views.button import Button
 from Views.vertex import Vertex
 
 
@@ -32,6 +33,7 @@ class Visualizer:
         self.graphManger: Final = GraphManager(*self.displaySize)
         self.dimentsManger: Final = DimensionsManger(scale, *self.displaySize)
         self.dimentsManger.scaleFactor = scale
+        self.buttons: List[Button] = []
 
     def main(self):
         try:
@@ -67,6 +69,9 @@ class Visualizer:
                 self.halt()
             if event.type == pg.MOUSEBUTTONDOWN:
                 mx, my = pg.mouse.get_pos()
+                for b in self.buttons:
+                    if b._rect.collidepoint((mx, my)):
+                        b.onClick()
                 self.startVertexSelectingMode(Pos(mx, my))
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
@@ -147,6 +152,10 @@ class Visualizer:
         if self.dimentsManger.scaleFactor > .1:
             self.dimentsManger.scaleFactor -= .1
             self.isScalding = True
+
+    def drawButtons(self):
+        for button in self.buttons:
+            button.draw(self.screen)
 
     def drawEdges(self):
         for edge in self.graphManger.edges:
