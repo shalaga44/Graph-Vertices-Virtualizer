@@ -40,6 +40,23 @@ class GraphGenerator:
         graphHolder = GraphHolder(self.edgesManger.edges, self.verticesManger.vertices)
         return graphHolder
 
+    def generateRandomShape(self) -> GraphHolder:
+        self.edgesManger.addEdges(
+            [EdgeHolder(1, 2),
+             EdgeHolder(0, 1),
+             EdgeHolder(0, 2),
+             EdgeHolder(2, 0),
+             EdgeHolder(3, 2),
+             EdgeHolder(2, 5),
+             EdgeHolder(3, 4),
+             EdgeHolder(4, 3),
+             EdgeHolder(6, 5),
+             EdgeHolder(6, 7),
+             EdgeHolder(7, 8),
+             EdgeHolder(8, 7),
+             EdgeHolder(5, 8)])
+        return self.exportGraphHolder()
+
     def generate2ComponentsGraph(self) -> GraphHolder:
         count = len(self.verticesManger.vertices)
 
@@ -72,6 +89,6 @@ class GraphGenerator:
         c, r = ((width // (dimentsManger.VerticesDiments.radius * 2)) // 2), (
                 (height // (dimentsManger.VerticesDiments.radius * 2)) // 2)
         self.vertices.extend([Vertex(-i, Pos(((i % c) * (width // c)),
-                                            ((i // c) * (height // r))))
+                                             ((i // c) * (height // r))))
                               for i in range(c * r)])
         return self.exportGraphHolder()

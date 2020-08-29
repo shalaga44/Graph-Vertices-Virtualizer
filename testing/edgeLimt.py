@@ -21,7 +21,7 @@ graphGenerator = GraphGenerator(w, h)
 graphGenerator.generateTriangle()
 graphGenerator.generate2ComponentsGraph()
 
-v.graphManger.setupFromGraphHolder(graphGenerator.exportGraphHolder())
+v.graphManger.setupFromGraphHolder(graphGenerator.generateRandomShape())
 v.startMouseThread()
 font = sdl.font.SysFont(sdl.font.get_default_font(), 30)
 
