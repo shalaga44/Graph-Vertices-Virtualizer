@@ -1,5 +1,5 @@
-from math import sqrt
-from typing import Union
+from math import sqrt, comb
+from typing import Union, List
 
 from DataTypes.pos import Pos
 from Views.vertex import Vertex
@@ -47,3 +47,12 @@ def getDistanceBetween2Vertices(vertex1: Vertex, vertex2: Vertex) -> float:
     # Not the same @_@ . I Don't Know why
     distance = sqrt(pow((vertex1.pos.x - vertex2.pos.x), 2) + pow((vertex1.pos.y - vertex2.pos.y), 2))
     return distance
+
+
+def calculateBezierPoints(t: float, controlPoints: List[Pos]) -> Pos:
+    if not 0 <= t <= 1: raise Exception("t: float ∈ [0,1]")
+    n: int = len(controlPoints) - 1
+    y: float = sum((pow((1 - t), n - i) * pow(t, i) * comb(n, i) * p.y) for i, p in enumerate(controlPoints))
+    x: float = sum((pow((1 - t), n - i) * pow(t, i) * comb(n, i) * p.x) for i, p in enumerate(controlPoints))
+
+    return Pos(int(x), int(y))
