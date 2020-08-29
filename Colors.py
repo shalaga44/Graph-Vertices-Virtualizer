@@ -1,3 +1,7 @@
+blue = (0, 0, 255)
+blueDark = (0, 0, 166)
+
+
 class VerticesColors:
     isMoving = (0, 255, 0)
     vertexSelectedColor = (255, 87, 57)
@@ -12,3 +16,8 @@ class MainColors:
 
 class EdgesColors:
     default = MainColors.onSurfaceColor
+
+
+class ButtonColors:
+    default = blue
+    defaultOnClick = blueDark

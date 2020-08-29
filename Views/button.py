@@ -16,10 +16,14 @@ class Button:
         self._text = str(_text)
         self._pos: Pos = _pos
         self.colorText = Colors.MainColors.surfaceColor
-        self.colorBackground = Colors.MainColors.onSurfaceColor
+        self.colorBackground = Colors.ButtonColors.default
+        self.colorBackgroundOnClick = Colors.ButtonColors.defaultOnClick
         self._rect: RectType = self._createRect(_pos.x, _pos.y, _width, _height)
         self._textImage: Surface = self._creatText(_text)
         self.action: Callable = lambda: print(f"Button {self._text}::onClick()")
+        self.isClicked = False
+        self.clickDurationAnim = 0
+        self.clickDurationAnimLimit = 5
 
     @staticmethod
     def _createRect(left, top, _width, height) -> RectType:
@@ -27,7 +31,11 @@ class Button:
         return rect
 
     def _drawRect(self, screen: display):
-        pygame.draw.rect(screen, self.colorBackground, self._rect)
+        if self.clickDurationAnim > 0:
+            pygame.draw.rect(screen, self.colorBackgroundOnClick, self._rect)
+            self.clickDurationAnim -= 1
+        else:
+            pygame.draw.rect(screen, self.colorBackground, self._rect)
 
     def _drawText(self, screen: display):
         screen.blit(self._textImage, self.textPos)
@@ -48,6 +56,7 @@ class Button:
 
     def onClick(self):
         self.action.__call__()
+        self.clickDurationAnim = self.clickDurationAnimLimit
 
     def setOnClick(self, func: Callable):
         self.action = func
