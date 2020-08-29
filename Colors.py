@@ -1,5 +1,11 @@
+black = (0,0,0)
+white = (255,255,255)
 blue = (0, 0, 255)
 blueDark = (0, 0, 166)
+red = (255, 0, 0)
+redDark = (166, 0, 0)
+green = (0,255,0)
+greenDark = (0,166,0)
 
 
 class VerticesColors:
@@ -19,5 +25,7 @@ class EdgesColors:
 
 
 class ButtonColors:
-    default = blue
-    defaultOnClick = blueDark
+    defaultBackground = green
+    defaultBackgroundOnClick = greenDark
+    defaultText = black
+    defaultTextOnClick = white
