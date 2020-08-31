@@ -17,11 +17,11 @@ from testing.utils import showPosOfVertices
 
 w, h = 1000, 1000
 v = Visualizer(displaySize=(w, h), scale=1)
-vertices = [VertexHolder('V0', (300, 600)), VertexHolder('V1', (700, 600)), VertexHolder('C0', (500, 400)),
-            VertexHolder('C1', (500, 700))]
+verticesC0 = [VertexHolder('V0', (300, 600)), VertexHolder('V1', (700, 600)), VertexHolder('C0', (500, 400)),
+              VertexHolder('C1', (500, 700))]
 edges = [EdgeHolder('V0', 'V1')]
 graphGenerator = GraphGenerator(w, h)
-graphGenerator.verticesManger.addVertices(vertices)
+graphGenerator.verticesManger.addVertices(verticesC0)
 graphGenerator.edgesManger.addEdges(edges)
 v.graphManger.setupFromGraphHolder(graphGenerator.exportGraphHolder())
 v.startMouseThread()
@@ -39,9 +39,12 @@ animationEnd = 100
 # RUN_BUTTON.setOnClick(RUN_BUTTON_ACTION)
 # v.buttons.append(RUN_BUTTON)
 
-vertices = [v.graphManger.verticesManger.byName('V0'),
-            v.graphManger.verticesManger.byName('C0'),
-            v.graphManger.verticesManger.byName('V1'), ]
+verticesC0 = [v.graphManger.verticesManger.byName('V0'),
+              v.graphManger.verticesManger.byName('C0'),
+              v.graphManger.verticesManger.byName('V1'), ]
+verticesC1 = [v.graphManger.verticesManger.byName('V0'),
+              v.graphManger.verticesManger.byName('C1'),
+              v.graphManger.verticesManger.byName('V1'), ]
 
 font = FontManager().font
 
@@ -82,18 +85,38 @@ while True:
     v.events()
     # showIntersectionCircle(v.graphManger.verticesManger.vertices)
     T = 0.0
-    points = []
+    pointsC0 = []
+    pointsC1 = []
     while T <= 1.0:
-        pos: Pos = calculateBezierPoints(T, list(map(lambda x: x.pos, vertices)))
-        points.append(tuple(pos))
+        posC0: Pos = calculateBezierPoints(T, list(map(lambda x: x.pos, verticesC0)))
+        posC1: Pos = calculateBezierPoints(T, list(map(lambda x: x.pos, verticesC1)))
+        pointsC0.append(tuple(posC0))
+        pointsC1.append(tuple(posC1))
         T += .01
-    sdl.draw.lines(v.screen, Colors.MainColors.onSurfaceColor, (), points, 5)
-    if animationTime < animationEnd:
-        circlePos = points[animationTime]
-        sdl.draw.circle(v.screen, Colors.red, tuple(circlePos), 20)
-        animationTime += 1
+    sdl.draw.lines(v.screen, Colors.MainColors.onSurfaceColor, (), pointsC0, 5)
+    sdl.draw.lines(v.screen, Colors.MainColors.onSurfaceColor, (), pointsC1, 5)
+    # if animationTime < animationEnd:
+    #     circlePos = points[animationTime]
+    #     sdl.draw.circle(v.screen, Colors.red, tuple(circlePos), 20)
+    #     animationTime += 1
+    midPos = getMidPointInLine(verticesC0[0], verticesC0[-1])
+    sdl.draw.circle(v.screen, Colors.red, tuple(midPos), 5)
+    r = 200
+    angle = getAngeBetweenVertices(verticesC0[0], verticesC0[-1])
+    c0x = ((r) * math.sin(math.pi)) + midPos.x
+    c0y = ((r) * math.cos((math.pi) + 1)) + midPos.y
+    c0 = v.graphManger.verticesManger.byName('C0')
+    c0.pos.x = c0x
+    c0.pos.y = c0y
 
-    sdl.draw.circle(v.screen, Colors.red, tuple(getMidPointInLine(vertices[0], vertices[-1])), 5)
+    c1x = (r * -math.sin(math.pi)) + midPos.x
+    c1y = (r * -math.cos(((math.pi) + 1))) + midPos.y
+    c1 = v.graphManger.verticesManger.byName('C1')
+    c1.pos.x = c1x
+    c1.pos.y = c1y
+
+    # sdl.draw.circle(v.screen, Colors.blueDark, tuple(map(int, (c1x, c1y))), 50)
+
     v.graphManger.setupVertices()
     v.graphManger.setupEdges()
     v.drawEdges()
