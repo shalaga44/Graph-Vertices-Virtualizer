@@ -17,7 +17,7 @@ graphGenerator = GraphGenerator(w, h)
 graphGenerator.generateTriangle()
 graphGenerator.generate2ComponentsGraph()
 
-v.graphManger.setupFromGraphHolder(graphGenerator.generateRandomShape())
+v.graphManger.setupFromGraphHolder(graphGenerator.exportGraphHolder())
 v.startMouseThread()
 font = sdl.font.SysFont(sdl.font.get_default_font(), 30)
 
@@ -30,15 +30,15 @@ fourthTime = False
 fifthTime = False
 while True:
     v.events()
-    showIntersectionCircle(v.graphManger.verticesManger.vertices, v)
+    showIntersectionCircle(v.graphManger.verticesManger.verticesC0, v)
 
     v.graphManger.setupVertices()
     v.graphManger.setupEdges()
     v.drawEdges()
     v.drawVertices()
 
-    showDistanceBetweenVertices(v.graphManger.vertices, v.screen)
-    showPosOfVertices(v.graphManger.vertices, v)
+    showDistanceBetweenVertices(v.graphManger.verticesC0, v.screen)
+    showPosOfVertices(v.graphManger.verticesC0, v)
     showDistanceBetweenEdges(v.graphManger.edges, v)
 
     v.updateDisplay()
