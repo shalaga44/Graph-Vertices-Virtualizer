@@ -24,11 +24,12 @@ class VerticesManager():
         self._vertices.extend(graphHolder.vertices)
         self._updateVerticesPositionsMap()
 
-    def addVertices(self, verticesHolder: List[VertexHolder]):
+    def addVertices(self, verticesHolder: List[VertexHolder]) -> List[Vertex]:
         newVertices = [self.createVertex(vertexHolder.name, vertexHolder.pos)
                        for vertexHolder in verticesHolder]
         self._vertices.extend(newVertices)
         self._updateVerticesPositionsMap()
+        return newVertices
 
     def byName(self, vertexName: str) -> Vertex:
         return self._vertices[self.verticesPositionsMap[str(vertexName)]]

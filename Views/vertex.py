@@ -5,6 +5,7 @@ from typing import Dict, Set, Final, NoReturn, Tuple
 
 from pygame.font import SysFont
 from pygame.font import get_default_font
+from pygame.font import init as fontInit
 from pygame.surface import Surface
 
 import Colors
@@ -74,6 +75,7 @@ class Vertex:
     def generateNewTextImage(self) -> NoReturn:
         from Mangers.graph_manager import DimensionsManger
         diments = DimensionsManger()
+        fontInit()
         font = SysFont(get_default_font(), diments.VerticesDiments.fontSize)
         keyImage = font.render(str(self.name), True, Colors.VerticesColors.OnVertexDefaultColor)
         wText, hText = font.size(str(self.name))

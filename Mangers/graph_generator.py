@@ -1,4 +1,4 @@
-from typing import Tuple, List, Final
+from typing import Tuple, List, Final, Dict
 
 from DataTypes.edge_holder import EdgeHolder
 from DataTypes.graph_holder import GraphHolder
@@ -29,9 +29,46 @@ class GraphGenerator:
     def clearEdges(self):
         self.edges.clear()
 
+    def addVerticesHolders(self, verticesHolders: List[VertexHolder]) -> List[Vertex]:
+        verticesHoldersFiltered: List[VertexHolder] = []
+        alreadyExistVerticesMap: Dict[int, Vertex] = {}
+        for idx, vH in enumerate(verticesHolders):
+            if vH.name not in self.verticesManger:
+                verticesHoldersFiltered.append(vH)
+            else:
+                alreadyExistVerticesMap[idx] = self.verticesManger.byName(vH.name)
+
+        newVertices: List[Vertex] = self.verticesManger.addVertices(verticesHolders)
+        self.verticesManger.vertices.extend(newVertices)
+        fullVerticesList: List[Vertex] = []
+        insertIndex = 0
+        existLen = len(list(alreadyExistVerticesMap.keys()))
+        existIndex = list(alreadyExistVerticesMap.keys())[0] if existLen > 0 else float("INF")
+        newIndex = 0
+        while insertIndex < len(newVertices) + existLen:
+            if existIndex <= newIndex:
+                fullVerticesList.append(alreadyExistVerticesMap[existIndex])
+                existIndex = list(alreadyExistVerticesMap.keys())[existIndex + 1]
+                insertIndex +=1
+
+            else:
+                fullVerticesList.append(newVertices[newIndex])
+                newIndex += 1
+                insertIndex +=1
+
+        return fullVerticesList
+
+    def addEdgesHolders(self, edgeHolders: List[EdgeHolder]) -> List[Edge]:
+        newEdges: List[Edge] = []
+        for edgeHolder in edgeHolders:
+            start, end = self.addVerticesHolders([VertexHolder(edgeHolder.start), VertexHolder(edgeHolder.end)])
+            newEdges.append(Edge(start, end))
+        self.edgesManger.edges.extend(newEdges)
+        return newEdges
+
     def generateTriangle(self) -> GraphHolder:
         count = len(self.verticesManger.vertices)
-        self.verticesManger.addVertices([VertexHolder(count), VertexHolder(count + 1), VertexHolder(count + 2)])
+        self.addVerticesHolders([VertexHolder(count), VertexHolder(count + 1), VertexHolder(count + 2)])
         self.edgesManger.addEdges(
             [EdgeHolder(count, count + 1), EdgeHolder(count + 1, count + 2), EdgeHolder(count + 2, count)])
         return self.exportGraphHolder()
