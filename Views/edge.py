@@ -15,6 +15,7 @@ class Edge:
         self.color = Colors.EdgesColors.default
         midPinPos: tuple = getMidPointInLine(startEdge.pos, endEdge.pos)
         self.bezierPins: List[BezierPin] = [BezierPin(Pos(*midPinPos))]
+        self.id = f"({startEdge.name}, {endEdge.name})"
 
     def __str__(self):
         return self._str

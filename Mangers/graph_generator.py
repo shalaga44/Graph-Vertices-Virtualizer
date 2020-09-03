@@ -1,4 +1,4 @@
-from typing import Tuple, List, Final, Dict
+from typing import Tuple, List, Final
 
 from DataTypes.edge_holder import EdgeHolder
 from DataTypes.graph_holder import GraphHolder
@@ -30,26 +30,11 @@ class GraphGenerator:
         self.edges.clear()
 
     def addVerticesHolders(self, verticesHolders: List[VertexHolder]) -> List[Vertex]:
-        verticesHoldersFiltered: List[VertexHolder] = list()
-        alreadyExistVerticesMap: Dict[int, Vertex] = dict()
-        for idx, vH in enumerate(verticesHolders):
-            if self.verticesManger.isExists(vH.name):
-                oldVertex:Vertex = self.verticesManger.byName(vH.name)
-                alreadyExistVerticesMap[idx] = oldVertex
-            else: verticesHoldersFiltered.append(vH)
-        newVertices: List[Vertex] = self.verticesManger.addVertices(verticesHolders)
-        self.verticesManger.vertices.extend(newVertices)
-        fullVerticesList: List[Vertex] = newVertices.copy()
-        for idx in alreadyExistVerticesMap.keys():
-            fullVerticesList.insert(idx, alreadyExistVerticesMap[idx])
-        return fullVerticesList
+        newVertices = self.verticesManger.addVerticesHolders(verticesHolders)
+        return newVertices
 
-    def addEdgesHolders(self, edgeHolders: List[EdgeHolder]) -> List[Edge]:
-        newEdges: List[Edge] = []
-        for edgeHolder in edgeHolders:
-            start, end = self.addVerticesHolders([VertexHolder(edgeHolder.start), VertexHolder(edgeHolder.end)])
-            newEdges.append(Edge(start, end))
-        self.edgesManger.edges.extend(newEdges)
+    def addEdgesHolders(self, edgesHolders: List[EdgeHolder]) -> List[Edge]:
+        newEdges = self.edgesManger.addEdgesHolders(edgesHolders)
         return newEdges
 
     def generateTriangle(self) -> GraphHolder:

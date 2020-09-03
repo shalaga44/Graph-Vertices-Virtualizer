@@ -24,7 +24,22 @@ class VerticesManager():
         self._vertices.extend(graphHolder.vertices)
         self._updateVerticesPositionsMap()
 
-    def addVertices(self, verticesHolder: List[VertexHolder]) -> List[Vertex]:
+    def addVerticesHolders(self, verticesHolders: List[VertexHolder]) -> List[Vertex]:
+        verticesHoldersFiltered: List[VertexHolder] = list()
+        alreadyExistVerticesMap: Dict[int, Vertex] = dict()
+        for idx, vH in enumerate(verticesHolders):
+            if self.isExists(vH.name):
+                oldVertex: Vertex = self.byName(vH.name)
+                alreadyExistVerticesMap[idx] = oldVertex
+            else: verticesHoldersFiltered.append(vH)
+        newVertices: List[Vertex] = self._addNewVerticesHolders(verticesHoldersFiltered)
+        fullVerticesList: List[Vertex] = []
+        fullVerticesList.extend(newVertices)
+        for idx in alreadyExistVerticesMap.keys():
+            fullVerticesList.insert(idx, alreadyExistVerticesMap[idx])
+        return fullVerticesList
+
+    def _addNewVerticesHolders(self, verticesHolder: List[VertexHolder]) -> List[Vertex]:
         newVertices = [self.createVertex(vertexHolder.name, vertexHolder.pos)
                        for vertexHolder in verticesHolder]
         self._vertices.extend(newVertices)

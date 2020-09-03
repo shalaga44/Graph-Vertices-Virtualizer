@@ -30,6 +30,13 @@ class MyTestCase(unittest.TestCase):
         for first, second in zip(newVerticesFirst, newVerticesSecond):
             self.assertEqual(first, second)
 
+    def test_add_already_added_edges_should_return_same_object(self):
+        edgesHolders = [EdgeHolder(start, end) for start, end in self.edgesTupleCollection0]
+        newEdgesFirst = self.g.addEdgesHolders(edgesHolders)
+        newEdgesSecond = self.g.addEdgesHolders(edgesHolders)
+        for first, second in zip(newEdgesFirst, newEdgesSecond):
+            self.assertEqual(first, second)
+
 
 if __name__ == '__main__':
     unittest.main()
