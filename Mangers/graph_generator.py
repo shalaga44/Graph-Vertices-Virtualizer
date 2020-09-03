@@ -30,32 +30,18 @@ class GraphGenerator:
         self.edges.clear()
 
     def addVerticesHolders(self, verticesHolders: List[VertexHolder]) -> List[Vertex]:
-        verticesHoldersFiltered: List[VertexHolder] = []
-        alreadyExistVerticesMap: Dict[int, Vertex] = {}
+        verticesHoldersFiltered: List[VertexHolder] = list()
+        alreadyExistVerticesMap: Dict[int, Vertex] = dict()
         for idx, vH in enumerate(verticesHolders):
-            if vH.name not in self.verticesManger:
-                verticesHoldersFiltered.append(vH)
-            else:
-                alreadyExistVerticesMap[idx] = self.verticesManger.byName(vH.name)
-
+            if self.verticesManger.isExists(vH.name):
+                oldVertex:Vertex = self.verticesManger.byName(vH.name)
+                alreadyExistVerticesMap[idx] = oldVertex
+            else: verticesHoldersFiltered.append(vH)
         newVertices: List[Vertex] = self.verticesManger.addVertices(verticesHolders)
         self.verticesManger.vertices.extend(newVertices)
-        fullVerticesList: List[Vertex] = []
-        insertIndex = 0
-        existLen = len(list(alreadyExistVerticesMap.keys()))
-        existIndex = list(alreadyExistVerticesMap.keys())[0] if existLen > 0 else float("INF")
-        newIndex = 0
-        while insertIndex < len(newVertices) + existLen:
-            if existIndex <= newIndex:
-                fullVerticesList.append(alreadyExistVerticesMap[existIndex])
-                existIndex = list(alreadyExistVerticesMap.keys())[existIndex + 1]
-                insertIndex +=1
-
-            else:
-                fullVerticesList.append(newVertices[newIndex])
-                newIndex += 1
-                insertIndex +=1
-
+        fullVerticesList: List[Vertex] = newVertices.copy()
+        for idx in alreadyExistVerticesMap.keys():
+            fullVerticesList.insert(idx, alreadyExistVerticesMap[idx])
         return fullVerticesList
 
     def addEdgesHolders(self, edgeHolders: List[EdgeHolder]) -> List[Edge]:

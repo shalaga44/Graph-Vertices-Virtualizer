@@ -23,6 +23,13 @@ class MyTestCase(unittest.TestCase):
         for oldTuple, newEdge in zip(self.edgesTupleCollection0, newEdges):
             self.assertEqual(str(oldTuple), str(newEdge))
 
+    def test_add_already_added_vertices_should_return_same_object(self):
+        verticesHolders = [VertexHolder(name) for name in self.verticesNamesCollection0]
+        newVerticesFirst = self.g.addVerticesHolders(verticesHolders)
+        newVerticesSecond = self.g.addVerticesHolders(verticesHolders)
+        for first, second in zip(newVerticesFirst, newVerticesSecond):
+            self.assertEqual(first, second)
+
 
 if __name__ == '__main__':
     unittest.main()

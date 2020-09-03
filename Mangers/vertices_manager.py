@@ -34,6 +34,9 @@ class VerticesManager():
     def byName(self, vertexName: str) -> Vertex:
         return self._vertices[self.verticesPositionsMap[str(vertexName)]]
 
+    def isExists(self, vertexName: str) -> bool:
+        return str(vertexName) in self.verticesPositionsMap
+
     def isSelectedVertex(self, v: Vertex) -> bool:
         if self.selectedVertexName is None: return False
         return v.name == self.selectedVertexName
