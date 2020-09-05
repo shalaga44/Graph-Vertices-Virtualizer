@@ -10,11 +10,12 @@ from Views.edge import Edge
 
 class EdgesManager:
     def __init__(self, globalVerticesManager: VerticesManager):
-        self._edges: Final[List[Edge]] = []
+        self.edges: Final[List[Edge]] = []
         self.edgesPositionsMap: Final[Dict[int, int]] = {}
         self.edgesMap: Final[Dict[str, Edge]] = {}
         self._verticesManager: VerticesManager = VerticesManager()
         self.globalVerticesManager: VerticesManager = globalVerticesManager
+        self._updateMaps()
 
     def addEdgesHolders(self, edgeHolders: List[EdgeHolder]) -> List[Edge]:
         finalEdges = []
@@ -32,10 +33,9 @@ class EdgesManager:
         return finalEdges
 
     def _addNewEdges(self, edges: List[Edge]):
-        self._edges.extend(edges)
+        self.edges.extend(edges)
+        self._updateMaps()
         self._updateVerticesManager(edges)
-        self._updateEdgesPositionsMap()
-        self._updateEdgesMap()
 
     def length(self, edge: Edge):
         start = self.globalVerticesManager.byName(edge.start.name)
@@ -48,17 +48,17 @@ class EdgesManager:
         return Edge(start, end)
 
     def importFromGraphHolder(self, graphHolder: GraphHolder):
-        self._edges.extend(graphHolder.edges)
-        self._updateEdgesPositionsMap()
+        self.edges.extend(graphHolder.edges)
+        self._updateMaps()
 
     def _updateEdgesPositionsMap(self):
-        self.edgesPositionsMap.update({self._edges[i]: i for i in range(len(self._edges))})
+        self.edgesPositionsMap.update({self.edges[i]: i for i in range(len(self.edges))})
 
     def __getitem__(self, key) -> Edge:
-        return self._edges[key]
+        return self.edges[key]
 
     def __iter__(self) -> Iterator[Edge]:
-        return iter(self._edges)
+        return iter(self.edges)
 
     def _createEdges(self, edgesHolders: List[EdgeHolder]) -> List[Edge]:
         return [self._createEdge(edgeHolder)
@@ -77,4 +77,8 @@ class EdgesManager:
         return self.edgesMap[edgeId]
 
     def _updateEdgesMap(self):
-        self.edgesMap.update({e.id: e for e in self._edges})
+        self.edgesMap.update({e.id: e for e in self.edges})
+
+    def _updateMaps(self):
+        self._updateEdgesPositionsMap()
+        self._updateEdgesMap()
