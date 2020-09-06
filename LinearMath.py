@@ -1,5 +1,5 @@
 from math import sqrt, comb
-from typing import Union, List
+from typing import Union, List, Tuple
 
 from DataTypes.pos import Pos
 from Views.vertex import Vertex
@@ -56,3 +56,8 @@ def calculateBezierPoints(t: float, controlPoints: List[Pos]) -> Pos:
     x: float = sum((pow((1 - t), n - i) * pow(t, i) * comb(n, i) * p.x) for i, p in enumerate(controlPoints))
 
     return Pos(int(x), int(y))
+
+
+def getMidPointInLine(start: Pos, end: Pos) -> Tuple:
+    return (start .x + ((end .x - start .x) // 2),
+            start .y + ((end .y - start .y) // 2))
