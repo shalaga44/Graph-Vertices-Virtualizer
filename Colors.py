@@ -1,11 +1,11 @@
-black = (0,0,0)
-white = (255,255,255)
+black = (0, 0, 0)
+white = (255, 255, 255)
 blue = (0, 0, 255)
 blueDark = (0, 0, 166)
 red = (255, 0, 0)
 redDark = (166, 0, 0)
-green = (0,255,0)
-greenDark = (0,166,0)
+green = (0, 255, 0)
+greenDark = (0, 166, 0)
 
 
 class VerticesColors:
@@ -21,6 +21,7 @@ class MainColors:
 
 
 class EdgesColors:
+    isCarve = green
     default = MainColors.onSurfaceColor
 
 
