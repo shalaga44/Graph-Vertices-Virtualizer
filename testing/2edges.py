@@ -7,7 +7,7 @@ import Colors
 from DataTypes.edge_holder import EdgeHolder
 from DataTypes.pos import Pos
 from DataTypes.vertex_holder import VertexHolder
-from LinearMath import calculateBezierPoints
+from LinearMath import calculateBezierPoints, getMidPointInLine
 from Mangers.font_manager import FontManager
 from Mangers.graph_generator import GraphGenerator
 from Views.edge import Edge
@@ -21,8 +21,8 @@ verticesC0 = [VertexHolder('V0', (300, 600)), VertexHolder('V1', (700, 600)), Ve
               VertexHolder('C1', (500, 700))]
 edges = [EdgeHolder('V0', 'V1')]
 graphGenerator = GraphGenerator(w, h)
-graphGenerator.verticesManger.addVertices(verticesC0)
-graphGenerator.edgesManger.addEdges(edges)
+graphGenerator.addVerticesHolders(verticesC0)
+graphGenerator.addEdgesHolders(edges)
 v.graphManger.setupFromGraphHolder(graphGenerator.exportGraphHolder())
 v.startMouseThread()
 
@@ -59,12 +59,7 @@ def getAngeBetweenVertices(start: Vertex, end: Vertex) -> float:
     except ZeroDivisionError:
         return 0
 
-    return math.atan(angle) * (180 / math.pi)
-
-
-def getMidPointInLine(start: Vertex, end: Vertex) -> Pos:
-    return Pos(start.pos.x + ((end.pos.x - start.pos.x) // 2),
-               start.pos.y + ((end.pos.y - start.pos.y) // 2))
+    return math.atan(angle)
 
 
 def showEdgeAngle(edges: List[Edge]):
@@ -73,7 +68,7 @@ def showEdgeAngle(edges: List[Edge]):
         start = v.graphManger.verticesManger.byName(edge.start)
         end = v.graphManger.verticesManger.byName(edge.end)
         angle = getAngeBetweenVertices(start, end)
-        text = f"{edge.start.name:^3}  {angle}  {edge.end.name:^3}"
+        text = f"{edge.start.name:^3}  {angle* (180 / math.pi)}  {edge.end.name:^3}"
         keyImage = font.render(text, True, Colors.MainColors.onSurfaceColor)
         posX = v.height - font.size(text)[0]
         v.screen.blit(keyImage, [posX - 20, posY])
@@ -81,6 +76,7 @@ def showEdgeAngle(edges: List[Edge]):
 
 
 circlePos = Pos(0, 0)
+v.graphManger.edgesManger.byId("(V0, V1)").isCarve = True
 while True:
     v.events()
     # showIntersectionCircle(v.graphManger.verticesManger.vertices)
@@ -93,18 +89,19 @@ while True:
         pointsC0.append(tuple(posC0))
         pointsC1.append(tuple(posC1))
         T += .01
-    sdl.draw.lines(v.screen, Colors.MainColors.onSurfaceColor, (), pointsC0, 5)
-    sdl.draw.lines(v.screen, Colors.MainColors.onSurfaceColor, (), pointsC1, 5)
+    sdl.draw.lines(v.screen, Colors.red, (), pointsC1, 5)
+    sdl.draw.lines(v.screen, Colors.red, (), pointsC0, 5)
+
     # if animationTime < animationEnd:
     #     circlePos = points[animationTime]
     #     sdl.draw.circle(v.screen, Colors.red, tuple(circlePos), 20)
     #     animationTime += 1
-    midPos = getMidPointInLine(verticesC0[0], verticesC0[-1])
+    midPos = Pos(*getMidPointInLine(verticesC0[0].pos, verticesC0[-1].pos))
     sdl.draw.circle(v.screen, Colors.red, tuple(midPos), 5)
     r = 200
     angle = getAngeBetweenVertices(verticesC0[0], verticesC0[-1])
-    c0x = ((r) * math.sin(math.pi)) + midPos.x
-    c0y = ((r) * math.cos((math.pi) + 1)) + midPos.y
+    c0x = (r * math.sin(math.pi)) + midPos.x
+    c0y = (r * math.cos(math.pi)) + midPos.y  
     c0 = v.graphManger.verticesManger.byName('C0')
     c0.pos.x = c0x
     c0.pos.y = c0y
@@ -120,6 +117,7 @@ while True:
     v.graphManger.setupVertices()
     v.graphManger.setupEdges()
     v.drawEdges()
+
     v.drawVertices()
     v.drawButtons()
     showPosOfVertices(v.graphManger.vertices, v)
