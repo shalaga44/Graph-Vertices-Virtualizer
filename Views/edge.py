@@ -13,9 +13,9 @@ class Edge:
         self.end: Vertex = endEdge
         self._str = f"({startEdge}, {endEdge})"
         self.color = Colors.EdgesColors.default
-        midPinPos: tuple = getMidPointInLine(startEdge.pos, endEdge.pos)
-        self.bezierPins: List[BezierPin] = [BezierPin(Pos(*midPinPos))]
-        self.id = f"({startEdge.name}, {endEdge.name})"
+        self.bezierPins: List[BezierPin] = []
+        self.id: str = f"({startEdge.name}, {endEdge.name})"
+        self._isCarve = False
 
     def __str__(self):
         return self._str
@@ -25,3 +25,19 @@ class Edge:
 
     def __iter__(self) -> Iterator[Vertex]:
         return iter((self.start, self.end))
+
+    @property
+    def midPoint(self) -> Pos:
+        return Pos(*getMidPointInLine(self.start.pos, self.end.pos))
+
+    @property
+    def isCarve(self) -> bool:
+        return self._isCarve
+
+    @isCarve.setter
+    def isCarve(self, value: bool):
+        if value:
+            self.color = Colors.EdgesColors.isCarve
+        else:
+            self.color = Colors.EdgesColors.default
+        self._isCarve = value
